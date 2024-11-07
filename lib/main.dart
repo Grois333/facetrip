@@ -5,6 +5,7 @@ import '/Place/ui/widgets/review_list.dart';
 import 'package:flutter/services.dart';
 import 'header_appbar.dart';
 import 'face_trips.dart';
+import 'face_trips_cupertino.dart';
 
 void main(){
   SystemChrome.setSystemUIOverlayStyle(
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: FaceTrips()
+      home: FaceTripsCupertino()
     );
   }
 }
