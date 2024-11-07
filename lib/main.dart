@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'description_place.dart';
-import 'review_list.dart';
+import '/Place/ui/widgets/description_place.dart';
+import '/Place/ui/widgets/review_list.dart';
 //import 'gradient_back.dart';
 import 'package:flutter/services.dart';
 import 'header_appbar.dart';
