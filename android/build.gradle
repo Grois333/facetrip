@@ -1,3 +1,15 @@
+buildscript {
+    repositories {
+        google()  // This is required to resolve the dependencies
+        mavenCentral()  // This is where Gradle looks for libraries
+    }
+    dependencies {
+        // This is where the classpath dependencies are defined
+        classpath 'com.android.tools.build:gradle:7.4.0'  // Gradle plugin version (make sure it matches your Flutter/Gradle version)
+        classpath 'com.google.gms:google-services:4.3.15'  // Firebase services plugin
+    }
+}
+
 allprojects {
     repositories {
         google()
