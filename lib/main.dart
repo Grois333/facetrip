@@ -1,3 +1,4 @@
+import 'package:facetrip/User/ui/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import '/Place/ui/widgets/description_place.dart';
 import '/Place/ui/widgets/review_list.dart';
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
         child: MaterialApp(
           title: 'FaceTrip',
-          home: FaceTripsCupertino(),
+          //home: FaceTripsCupertino(),
+          home: SignInScreen(),
         ),
         bloc: UserBloc());
   }
