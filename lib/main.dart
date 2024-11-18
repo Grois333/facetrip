@@ -9,16 +9,23 @@ import 'face_trips.dart';
 import 'face_trips_cupertino.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main(){
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
+
+  // Initialize Firebase before running the app
+  await Firebase.initializeApp(); // Firebase initialization
+
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.light
-    )
+      statusBarBrightness: Brightness.light,
+    ),
   );
+
   runApp(MyApp());
-} 
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

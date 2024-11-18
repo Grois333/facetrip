@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.facetrip"
+    namespace "com.groisman.facetrip"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -66,7 +66,11 @@ flutter {
 }
 
 dependencies {
-    
+    implementation platform('com.google.firebase:firebase-bom:32.0.0') // Firebase BOM ensures versions compatibility
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'androidx.multidex:multidex:2.0.1' // MultiDex for support on older devices
 }
+
 
 apply plugin: 'com.google.gms.google-services'
