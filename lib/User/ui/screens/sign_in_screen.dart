@@ -67,6 +67,7 @@ class _SignInScreen extends State<SignInScreen> {
                 //   userBloc.signIn().then((User user) => print("El usuario es ${user.displayName}"));
                 // },
                 onPressed: () async {
+                  userBloc.signOut();
                   try {
                     User user = await userBloc.signIn();
                     print("El usuario es ${user.displayName}");
