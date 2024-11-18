@@ -14,4 +14,7 @@ class AuthRepository {
 
     return user;
   }
+
+  signOut() => _firebaseAuthAPI.signOut();
+
 }

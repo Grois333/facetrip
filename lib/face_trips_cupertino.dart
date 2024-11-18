@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'Place/ui/screens/home_trips.dart';
 import 'Place/ui/screens/search_trips.dart';
 import '/User/ui/screens/profile_trips.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:facetrip/User/bloc/bloc_user.dart';
 
 class FaceTripsCupertino extends StatelessWidget {
   @override
@@ -38,7 +40,13 @@ class FaceTripsCupertino extends StatelessWidget {
               );
             case 2:
               return CupertinoTabView(
-                builder: (BuildContext context) => ProfileTrips(),
+                //builder: (BuildContext context) => ProfileTrips(),
+                builder: (BuildContext context) {
+                  return BlocProvider<UserBloc>(
+                    bloc: UserBloc(),
+                    child: ProfileTrips(),
+                  );
+                },
               );
             default:
               // Handle any unexpected index values (although unlikely in your case)
