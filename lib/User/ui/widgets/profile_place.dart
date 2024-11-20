@@ -5,10 +5,10 @@ import 'package:facetrip/User/ui/widgets/profile_place.dart';
 
 class ProfilePlace extends StatelessWidget {
 
-  String image;
+  //String image;
   Place place;
 
-  ProfilePlace(this.image, this.place);
+  ProfilePlace(this.place);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class ProfilePlace extends StatelessWidget {
       decoration: BoxDecoration(
           image: DecorationImage(
               fit: BoxFit.cover,
-              image: AssetImage(image)
+              image:  NetworkImage(place.urlImage)
           ),
           borderRadius: BorderRadius.all(Radius.circular(20.0)),
           color: Colors.red,

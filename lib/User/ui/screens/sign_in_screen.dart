@@ -4,7 +4,9 @@ import 'package:facetrip/widgets/gradient_back.dart';
 import 'package:facetrip/widgets/button_green.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:facetrip/User/model/user.dart';
+
 
 
 class SignInScreen extends StatefulWidget {
@@ -69,8 +71,24 @@ class _SignInScreen extends State<SignInScreen> {
                 onPressed: () async {
                   userBloc.signOut();
                   try {
-                    User user = await userBloc.signIn();
-                    print("El usuario es ${user.displayName}");
+                    //User user = await userBloc.signIn();
+                    //print("El usuario es ${user.displayName}");
+
+                    userBloc.signIn().then((auth.User firebaseUser) {
+                      // Use Firebase's User object and map it to your custom User
+                      userBloc.updateUserData(
+                        User(
+                          key: Key('user_${firebaseUser.uid}'), // Generate a unique Key using the UID
+                          uid: firebaseUser.uid,
+                          name: firebaseUser.displayName ?? "", // Handle null values
+                          email: firebaseUser.email ?? "", // Handle null values
+                          photoURL: firebaseUser.photoURL ?? "", // Handle null values
+                          myPlaces: [], // Placeholder, update as needed
+                          myFavoritePlaces: [], // Placeholder, update as needed
+                        ),
+                      );
+                    });
+
                   } catch (e) {
                     print("Sign-in failed: $e");
                     // Display error to the user

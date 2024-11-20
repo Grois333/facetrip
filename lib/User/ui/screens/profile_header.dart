@@ -82,7 +82,20 @@ class ProfileHeader extends StatelessWidget {
     }else{
       print("Logeado");
       print(snapshot.data);
-      user = User(key: Key(snapshot.data.uid), name: snapshot.data.displayName, email: snapshot.data.email, photoURL: snapshot.data.photoURL);
+
+       // Map Firebase User data to your custom User model
+    final firebaseUser = snapshot.data as firebase_auth.User;
+    user = User(
+      key: Key(firebaseUser.uid), // Pass unique Key
+      uid: firebaseUser.uid, // Pass uid
+      name: firebaseUser.displayName ?? "No Name", // Handle null displayName
+      email: firebaseUser.email ?? "No Email", // Handle null email
+      photoURL: firebaseUser.photoURL ?? "", // Handle null photoURL
+      myPlaces: [], // Default to empty list
+      myFavoritePlaces: [], // Default to empty list
+    );
+      
+      
       final title = Text(
         'Profile',
         style: TextStyle(
