@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:facetrip/Place/ui/widgets/title_input_location.dart';
+import 'package:facetrip/widgets/text_input.dart';
+import 'package:facetrip/widgets/title_header.dart';
 import 'package:flutter/material.dart';
 import 'package:facetrip/widgets/gradient_back.dart';
 
@@ -20,6 +23,10 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+
+    final _controllerTitlePlace = TextEditingController();
+    final _controllerDescriptionPlace = TextEditingController();
+
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -38,8 +45,45 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                       }
                   ),
                 ),
-              )
+              ),
+               Flexible(
+              child: Container(
+                padding: EdgeInsets.only(top: 45.0, left: 20.0, right: 10.0),
+                child: TitleHeader(title: "Add a new Place"),
+              ))
             ],
+          ),
+
+          Container(
+            margin: EdgeInsets.only(top: 120.0, bottom:20.0),
+            child: ListView(
+              children: <Widget>[
+                Container(), //Foto
+                Container(//TextField Title
+                  margin: EdgeInsets.only(bottom: 20.0),
+                  child: TextInput(
+                    hintText: "Title",
+                    inputType: TextInputType.text,
+                    maxLines: 1,
+                    controller: _controllerTitlePlace,
+                  ),
+                ),
+                TextInput(//Description
+                  hintText: "Description",
+                  inputType: TextInputType.multiline,
+                  maxLines: 4,
+                  controller: _controllerDescriptionPlace,
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 20.0),
+                  child: TextInputLocation(
+                    hintText: "Add Location",
+                    iconData: Icons.location_on,
+                  ),
+                )
+              ],
+            ),
+
           )
         ],
       ),
