@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:facetrip/Place/ui/widgets/card_image.dart';
 import 'package:facetrip/Place/ui/widgets/title_input_location.dart';
+import 'package:facetrip/widgets/button_purple.dart';
 import 'package:facetrip/widgets/text_input.dart';
 import 'package:facetrip/widgets/title_header.dart';
 import 'package:flutter/material.dart';
@@ -90,6 +91,19 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                   child: TextInputLocation(
                     hintText: "Add Location",
                     iconData: Icons.location_on,
+                  ),
+                ),
+                Container(
+                  width: 70.0,
+                  child: ButtonPurple(
+                    buttonText: "Add Place",
+                    onPressed: () {
+                      //1. Firebase Storage
+                      //url -
+
+                      //2. Cloud Firestore
+                      //Place - title, description, url, userOwner, likes
+                    },
                   ),
                 )
               ],
