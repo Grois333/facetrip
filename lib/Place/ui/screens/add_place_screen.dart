@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:facetrip/Place/ui/widgets/card_image.dart';
 import 'package:facetrip/Place/ui/widgets/title_input_location.dart';
 import 'package:facetrip/widgets/text_input.dart';
 import 'package:facetrip/widgets/title_header.dart';
@@ -58,9 +59,19 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
             margin: EdgeInsets.only(top: 120.0, bottom:20.0),
             child: ListView(
               children: <Widget>[
-                Container(), //Foto
+                Container(
+                  alignment: Alignment.center,
+                  child: CardImageWithFabIcon(
+                    pathImage: "assets/img/sunset.jpeg",//widget.image.path,
+                    iconData: Icons.camera_alt,
+                    width: 350.0,
+                    height: 250.0,
+                    onPressedFabIcon: ()=>{},
+                    left: 0,
+                  ),
+                ), //Foto
                 Container(//TextField Title
-                  margin: EdgeInsets.only(bottom: 20.0),
+                  margin: EdgeInsets.only(top:20.0, bottom: 20.0),
                   child: TextInput(
                     hintText: "Title",
                     inputType: TextInputType.text,
