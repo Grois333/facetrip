@@ -14,9 +14,15 @@ import 'package:facetrip/User/model/user.dart' as user_model;
 import 'package:facetrip/User/bloc/bloc_user.dart' as user_bloc;
 
 class AddPlaceScreen extends StatefulWidget {
-  final File? image;
+  
+  //final File? image;
 
-  AddPlaceScreen(this.image);
+  final File imageFile;
+
+  //AddPlaceScreen(this.image);
+
+  // Constructor to accept the image file
+  AddPlaceScreen({required this.imageFile});
 
   @override
   State createState() {
@@ -35,6 +41,9 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
     // Initialize the controllers
     _controllerTitlePlace = TextEditingController();
     _controllerDescriptionPlace = TextEditingController();
+
+    print("AddPlaceScreen initialized");
+
   }
 
   @override
@@ -42,7 +51,10 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
     // Dispose of the controllers to avoid memory leaks
     _controllerTitlePlace.dispose();
     _controllerDescriptionPlace.dispose();
+
+    print("AddPlaceScreen disposed");
     super.dispose();
+
   }
 
   @override
@@ -83,11 +95,12 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
             margin: EdgeInsets.only(top: 120.0, bottom: 20.0),
             child: ListView(
               children: <Widget>[
+                
                 // Image card
                 Container(
                   alignment: Alignment.center,
                   child: CardImageWithFabIcon(
-                    pathImage: "assets/img/sunset.jpeg", // Placeholder for the image
+                    pathImage: widget.imageFile.path, //"assets/img/sunset.jpeg", // Placeholder for the image
                     iconData: Icons.camera_alt,
                     width: 350.0,
                     height: 250.0,
@@ -95,6 +108,8 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                     left: 0,
                   ),
                 ),
+
+
                 // Title TextField
                 Container(
                   margin: EdgeInsets.only(top: 20.0, bottom: 20.0),
