@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:facetrip/Place/model/place.dart';
 import 'package:facetrip/Place/ui/widgets/card_image.dart';
 import 'package:facetrip/Place/ui/widgets/title_input_location.dart';
@@ -12,17 +11,14 @@ import 'package:facetrip/widgets/gradient_back.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/model/user.dart' as user_model;
 import 'package:facetrip/User/bloc/bloc_user.dart' as user_bloc;
+import 'package:image_picker/image_picker.dart';  // Import ImagePicker for camera functionality
+import 'dart:async';
 
 class AddPlaceScreen extends StatefulWidget {
-  
-  //final File? image;
-
-  final File imageFile;
-
-  //AddPlaceScreen(this.image);
+  final File? imageFile;
 
   // Constructor to accept the image file
-  AddPlaceScreen({required this.imageFile});
+  AddPlaceScreen({this.imageFile});
 
   @override
   State createState() {
@@ -34,6 +30,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
   // Declare controllers as instance variables so they persist across rebuilds
   late TextEditingController _controllerTitlePlace;
   late TextEditingController _controllerDescriptionPlace;
+  late File? _imageFile;  // Use nullable File
 
   @override
   void initState() {
@@ -41,9 +38,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
     // Initialize the controllers
     _controllerTitlePlace = TextEditingController();
     _controllerDescriptionPlace = TextEditingController();
-
-    print("AddPlaceScreen initialized");
-
+    _imageFile = widget.imageFile;  // Set the initial image file from widget constructor
   }
 
   @override
@@ -51,10 +46,19 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
     // Dispose of the controllers to avoid memory leaks
     _controllerTitlePlace.dispose();
     _controllerDescriptionPlace.dispose();
-
-    print("AddPlaceScreen disposed");
     super.dispose();
+  }
 
+  // Function to open the camera and capture an image
+  Future<void> _openCamera() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);  // Store the captured image
+      });
+    }
   }
 
   @override
@@ -95,20 +99,39 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
             margin: EdgeInsets.only(top: 120.0, bottom: 20.0),
             child: ListView(
               children: <Widget>[
-                
+
                 // Image card
                 Container(
                   alignment: Alignment.center,
-                  child: CardImageWithFabIcon(
-                    pathImage: widget.imageFile.path, //"assets/img/sunset.jpeg", // Placeholder for the image
-                    iconData: Icons.camera_alt,
-                    width: 350.0,
-                    height: 250.0,
-                    onPressedFabIcon: () {},
-                    left: 0,
+                  child: Stack(
+                    children: [
+
+                      CardImageWithFabIcon(
+                        pathImage: _imageFile?.path ?? "", // Image from the passed file
+                        iconData: Icons.favorite_border, // You can keep this for the image card
+                        width: 350.0,
+                        height: 250.0,
+                        onPressedFabIcon: () {
+                          // Keep this for image card functionality if needed
+                        },
+                        left: 0,
+                      ),
+
+                      Positioned(
+                        top: 10.0,
+                        right: 10.0,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.camera_alt,
+                            size: 40.0,
+                            color: Colors.white, // Set the icon color
+                          ),
+                          onPressed: _openCamera, // Trigger the same function
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-
 
                 // Title TextField
                 Container(
@@ -160,7 +183,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                           name: _controllerTitlePlace.text,
                           description: _controllerDescriptionPlace.text,
                           likes: 0,
-                          urlImage: "https://example.com/image.jpg", // Use dynamic URL if needed
+                          urlImage: _imageFile?.path ?? "https://example.com/default-image.jpg", // Use dynamic URL if needed
                           userOwner: currentUserModel, // Pass the User model here
                         )).then((_) {
                           print("Place successfully added to Firestore!");

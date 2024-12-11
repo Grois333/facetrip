@@ -68,32 +68,44 @@ class ButtonsBar extends StatelessWidget {
               Icons.add,
               40.0,
               Color.fromRGBO(255, 255, 255, 1),
-              () async {
-                try {
-                  // Pick the image using the ImagePicker package
-                  final ImagePicker picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
-                  // Check if an image was picked
-                  if (image != null) {
-                    print("Image path: ${image.path}"); // Add this line to verify the image path.
-
-                    // Make sure to navigate with the correct context and pass the File(image.path)
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => AddPlaceScreen(
-                          imageFile: File(image.path), // Ensure File is passed correctly
-                        ),
-                      ),
-                    );
-                  } else {
-                    print("No image picked");
-                  }
-                } catch (e) {
-                  print("Error picking image: $e");
-                }
+              (){
+                // Navigate to AddPlaceScreen when the icon is pressed
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddPlaceScreen(), // Navigate to AddPlaceScreen
+                  ),
+                );
               },
+
+              // () async {
+              //   try {
+              //     // Pick the image using the ImagePicker package
+              //     final ImagePicker picker = ImagePicker();
+              //     final XFile? image = await picker.pickImage(source: ImageSource.camera);
+
+              //     // Check if an image was picked
+              //     if (image != null) {
+              //       print("Image path: ${image.path}"); // Add this line to verify the image path.
+
+              //       // Make sure to navigate with the correct context and pass the File(image.path)
+              //       Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (BuildContext context) => AddPlaceScreen(
+              //             imageFile: File(image.path), // Ensure File is passed correctly
+              //           ),
+              //         ),
+              //       );
+              //     } else {
+              //       print("No image picked");
+              //     }
+              //   } catch (e) {
+              //     print("Error picking image: $e");
+              //   }
+              // },
+
             ),
 
 
