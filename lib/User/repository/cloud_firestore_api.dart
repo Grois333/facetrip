@@ -24,15 +24,28 @@ class CloudFirestoreAPI{
     }, SetOptions(merge: true));
   }
 
-  Future<void> updatePlaceData(Place place)async {
+  Future<void> updatePlaceData(Place place) async {
     CollectionReference refPlaces = _db.collection(PLACES);
+
     auth.User? user= _auth.currentUser;
-    await  refPlaces.add({
-      'name': place.name,
-      'descrption': place.description,
-      'likes': place.likes,
-      'userOwner': "${USERS}/${user!.uid}" //reference
-    });
+    if (user == null){
+      return print("user is null");
+    }else{
+      refPlaces.add({
+        'name': place.name,
+        'description': place.description,
+        'likes': place.likes,
+        'userOwner': _db.doc("$USERS/${user.uid}"),
+      }).then((dr){
+        dr.get().then((snapshot){
+          snapshot.id;// ID Places
+          DocumentReference refUsers = _db.collection(USERS).doc(user.uid);
+          refUsers.update({
+            'myPlacces': FieldValue.arrayUnion([_db.doc("$PLACES/${snapshot.id}")])
+          });
+        });
+      });
+    }
   }
 
 }
