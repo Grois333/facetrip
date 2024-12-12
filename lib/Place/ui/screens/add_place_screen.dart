@@ -6,6 +6,7 @@ import 'package:facetrip/widgets/button_purple.dart';
 import 'package:facetrip/widgets/text_input.dart';
 import 'package:facetrip/widgets/title_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:facetrip/widgets/gradient_back.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -163,49 +164,59 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                   width: 70.0,
                   child: ButtonPurple(
                     buttonText: "Add Place",
-                    onPressed: () {
 
-                      //1. Firebase Storage
-                      //url -
-                      //Id del usuario logeado actualmente
-                      userBloc.currentUser().then((User? user){
-                        if(user != null){
-
-                        }
-                      });
-
-
+                    onPressed: () async {
                       if (currentUser != null) {
-                        // Correctly create a User instance using the alias
                         user_model.User currentUserModel = user_model.User(
                           key: UniqueKey(),
                           uid: currentUser.uid,
                           email: currentUser.email ?? "",
                           name: currentUser.displayName ?? "Anonymous",
                           photoURL: currentUser.photoURL ?? "",
-                          myPlaces: [], // Empty list for myPlaces
-                          myFavoritePlaces: [], // Empty list for myFavoritePlaces
+                          myPlaces: [],
+                          myFavoritePlaces: [],
                         );
 
-                        // Dynamically associate the place with the current user
-                        userBloc.updatePlaceData(Place(
-                          key: UniqueKey(),
-                          id: "1",
-                          name: _controllerTitlePlace.text,
-                          description: _controllerDescriptionPlace.text,
-                          likes: 0,
-                          urlImage: _imageFile?.path ?? "https://example.com/default-image.jpg", // Use dynamic URL if needed
-                          userOwner: currentUserModel, // Pass the User model here
-                        )).then((_) {
-                          print("Place successfully added to Firestore!");
-                          Navigator.pop(context);
-                        }).catchError((error) {
-                          print("Failed to add place: $error");
-                        });
+                        if (_imageFile != null) {
+                          String path = "${currentUser.uid}/${DateTime.now().toString()}.jpg";
+
+                          try {
+                            // Upload file to Firebase Storage
+                            final storageRef = FirebaseStorage.instance.ref().child(path);
+                            final uploadTask = storageRef.putFile(_imageFile!);
+
+                            // Wait for upload to complete
+                            final snapshot = await uploadTask;
+
+                            // Get the download URL
+                            final imageUrl = await snapshot.ref.getDownloadURL();
+
+                            print("Uploaded Image URL: $imageUrl");
+
+                            // Save place data to Firestore
+                            await userBloc.updatePlaceData(Place(
+                              key: UniqueKey(),
+                              id: "1",
+                              name: _controllerTitlePlace.text,
+                              description: _controllerDescriptionPlace.text,
+                              likes: 0,
+                              urlImage: imageUrl, // Save the image URL dynamically
+                              userOwner: currentUserModel,
+                            ));
+
+                            print("Place successfully added to Firestore!");
+                            Navigator.pop(context);
+                          } catch (error) {
+                            print("Failed to upload image or save data: $error");
+                          }
+                        } else {
+                          print("No image selected.");
+                        }
                       } else {
                         print("No user is logged in.");
                       }
                     },
+                    
                   ),
                 )
               ],
