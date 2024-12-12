@@ -12,13 +12,11 @@ import 'package:facetrip/widgets/gradient_back.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/model/user.dart' as user_model;
 import 'package:facetrip/User/bloc/bloc_user.dart' as user_bloc;
-import 'package:image_picker/image_picker.dart';  // Import ImagePicker for camera functionality
-import 'dart:async';
+import 'package:image_picker/image_picker.dart';
 
 class AddPlaceScreen extends StatefulWidget {
   final File? imageFile;
 
-  // Constructor to accept the image file
   AddPlaceScreen({this.imageFile});
 
   @override
@@ -28,45 +26,78 @@ class AddPlaceScreen extends StatefulWidget {
 }
 
 class _AddPlaceScreen extends State<AddPlaceScreen> {
-  // Declare controllers as instance variables so they persist across rebuilds
   late TextEditingController _controllerTitlePlace;
   late TextEditingController _controllerDescriptionPlace;
-  late File? _imageFile;  // Use nullable File
+  late File? _imageFile;
+  bool _isSubmitting = false; // Track submission status
 
   @override
   void initState() {
     super.initState();
-    // Initialize the controllers
     _controllerTitlePlace = TextEditingController();
     _controllerDescriptionPlace = TextEditingController();
-    _imageFile = widget.imageFile;  // Set the initial image file from widget constructor
+    _imageFile = widget.imageFile;
   }
 
   @override
   void dispose() {
-    // Dispose of the controllers to avoid memory leaks
     _controllerTitlePlace.dispose();
     _controllerDescriptionPlace.dispose();
     super.dispose();
   }
 
-  // Function to open the camera and capture an image
   Future<void> _openCamera() async {
     final picker = ImagePicker();
     final pickedFile = await picker.getImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);  // Store the captured image
+        _imageFile = File(pickedFile.path);
       });
+    }
+  }
+
+  Future<void> _handleAddPlace(user_bloc.UserBloc userBloc, user_model.User currentUserModel) async {
+    if (_imageFile != null) {
+      String path = "${currentUserModel.uid}/${DateTime.now().toString()}.jpg";
+
+      try {
+        setState(() {
+          _isSubmitting = true; // Start loading
+        });
+
+        final storageRef = FirebaseStorage.instance.ref().child(path);
+        final uploadTask = storageRef.putFile(_imageFile!);
+        final snapshot = await uploadTask;
+
+        final imageUrl = await snapshot.ref.getDownloadURL();
+
+        await userBloc.updatePlaceData(Place(
+          key: UniqueKey(),
+          id: "1",
+          name: _controllerTitlePlace.text,
+          description: _controllerDescriptionPlace.text,
+          likes: 0,
+          urlImage: imageUrl,
+          userOwner: currentUserModel,
+        ));
+
+        Navigator.pop(context);
+      } catch (error) {
+        print("Failed to upload image or save data: $error");
+      } finally {
+        setState(() {
+          _isSubmitting = false; // Stop loading
+        });
+      }
+    } else {
+      print("No image selected.");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the UserBloc instance using the alias
     user_bloc.UserBloc userBloc = BlocProvider.of<user_bloc.UserBloc>(context);
-
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -93,31 +124,25 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                   padding: EdgeInsets.only(top: 45.0, left: 20.0, right: 10.0),
                   child: TitleHeader(title: "Add a new Place"),
                 ),
-              )
+              ),
             ],
           ),
           Container(
             margin: EdgeInsets.only(top: 120.0, bottom: 20.0),
             child: ListView(
               children: <Widget>[
-
-                // Image card
                 Container(
                   alignment: Alignment.center,
                   child: Stack(
                     children: [
-
                       CardImageWithFabIcon(
-                        pathImage: _imageFile?.path ?? "", // Image from the passed file
-                        iconData: Icons.favorite_border, // You can keep this for the image card
+                        pathImage: _imageFile?.path ?? "",
+                        iconData: Icons.favorite_border,
                         width: 350.0,
                         height: 250.0,
-                        onPressedFabIcon: () {
-                          // Keep this for image card functionality if needed
-                        },
+                        onPressedFabIcon: () {},
                         left: 0,
                       ),
-
                       Positioned(
                         top: 10.0,
                         right: 10.0,
@@ -125,16 +150,14 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                           icon: Icon(
                             Icons.camera_alt,
                             size: 40.0,
-                            color: Colors.white, // Set the icon color
+                            color: Colors.white,
                           ),
-                          onPressed: _openCamera, // Trigger the same function
+                          onPressed: _openCamera,
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                // Title TextField
                 Container(
                   margin: EdgeInsets.only(top: 20.0, bottom: 20.0),
                   child: TextInput(
@@ -144,14 +167,12 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                     controller: _controllerTitlePlace,
                   ),
                 ),
-                // Description TextField
                 TextInput(
                   hintText: "Description",
                   inputType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _controllerDescriptionPlace,
                 ),
-                // Location TextField
                 Container(
                   margin: EdgeInsets.only(top: 20.0),
                   child: TextInputLocation(
@@ -159,12 +180,10 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                     iconData: Icons.location_on,
                   ),
                 ),
-                // Add Place Button
                 Container(
                   width: 70.0,
                   child: ButtonPurple(
                     buttonText: "Add Place",
-
                     onPressed: () async {
                       if (currentUser != null) {
                         user_model.User currentUserModel = user_model.User(
@@ -176,52 +195,25 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                           myPlaces: [],
                           myFavoritePlaces: [],
                         );
-
-                        if (_imageFile != null) {
-                          String path = "${currentUser.uid}/${DateTime.now().toString()}.jpg";
-
-                          try {
-                            // Upload file to Firebase Storage
-                            final storageRef = FirebaseStorage.instance.ref().child(path);
-                            final uploadTask = storageRef.putFile(_imageFile!);
-
-                            // Wait for upload to complete
-                            final snapshot = await uploadTask;
-
-                            // Get the download URL
-                            final imageUrl = await snapshot.ref.getDownloadURL();
-
-                            print("Uploaded Image URL: $imageUrl");
-
-                            // Save place data to Firestore
-                            await userBloc.updatePlaceData(Place(
-                              key: UniqueKey(),
-                              id: "1",
-                              name: _controllerTitlePlace.text,
-                              description: _controllerDescriptionPlace.text,
-                              likes: 0,
-                              urlImage: imageUrl, // Save the image URL dynamically
-                              userOwner: currentUserModel,
-                            ));
-
-                            print("Place successfully added to Firestore!");
-                            Navigator.pop(context);
-                          } catch (error) {
-                            print("Failed to upload image or save data: $error");
-                          }
-                        } else {
-                          print("No image selected.");
-                        }
+                        await _handleAddPlace(userBloc, currentUserModel);
                       } else {
                         print("No user is logged in.");
                       }
                     },
-                    
                   ),
-                )
+                ),
               ],
             ),
-          )
+          ),
+          if (_isSubmitting)
+            ModalBarrier(
+              dismissible: false,
+              color: Colors.black.withOpacity(0.5),
+            ),
+          if (_isSubmitting)
+            Center(
+              child: CircularProgressIndicator(),
+            ),
         ],
       ),
     );
