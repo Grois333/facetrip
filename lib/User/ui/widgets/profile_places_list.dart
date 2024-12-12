@@ -1,10 +1,12 @@
-import 'package:facetrip/User/model/user.dart';
 import 'package:flutter/material.dart';
+import 'package:facetrip/User/bloc/bloc_user.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:facetrip/User/model/user.dart';
 import 'package:facetrip/User/ui/widgets/profile_place.dart';
 import 'package:facetrip/Place/model/place.dart';
 
-
 class ProfilePlacesList extends StatelessWidget {
+  late UserBloc userBloc;
 
   Place place = Place(
     key: UniqueKey(),
@@ -22,13 +24,13 @@ class ProfilePlacesList extends StatelessWidget {
       myPlaces: [],
       myFavoritePlaces: [],
     ),
-
   );
+
   Place place2 = Place(
     key: UniqueKey(),
     id: "2",
     name: "Mountains",
-    description: "Hiking. Water fall hunting. Natural bath', 'Scenery & Photography",
+    description: "Hiking. Water fall hunting. Natural bath, Scenery & Photography",
     urlImage: "https://images.unsplash.com/photo-1524654458049-e36be0721fa2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80",
     likes: 10,
     userOwner: User(
@@ -40,27 +42,51 @@ class ProfilePlacesList extends StatelessWidget {
       myPlaces: [],
       myFavoritePlaces: [],
     ),
-
   );
-  /*Place place = new Place('Knuckles Mountains Range', 'Hiking. Water fall hunting. Natural bath', 'Scenery & Photography', '123,123,123');
-  Place place2 = new Place('Mountains', 'Hiking. Water fall hunting. Natural bath', 'Scenery & Photography', '321,321,321');
-  */
+
   @override
   Widget build(BuildContext context) {
+    userBloc = BlocProvider.of<UserBloc>(context);
+
     return Container(
       margin: EdgeInsets.only(
-          top: 10.0,
-          left: 20.0,
-          right: 20.0,
-          bottom: 10.0
+        top: 10.0,
+        left: 20.0,
+        right: 20.0,
+        bottom: 10.0,
       ),
-      child: Column(
-        children: <Widget>[
-          ProfilePlace(place),
-          ProfilePlace(place2),
-        ],
+      child: StreamBuilder(
+        stream: userBloc.placesStream,
+        builder: (context, AsyncSnapshot snapshot) {
+          // Handle different connection states
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(child: CircularProgressIndicator());  // While waiting for data
+            case ConnectionState.done:
+              // When the stream is done, build the places list
+              if (snapshot.hasData && snapshot.data.documents.isNotEmpty) {
+                return Column(
+                  children: userBloc.buildPlaces(snapshot.data.documents),
+                );
+              } else {
+                return Center(child: Text("No places available."));  // If no data found
+              }
+            case ConnectionState.active:
+              // Handle active connection state (when data is streaming)
+              if (snapshot.hasData && snapshot.data.documents.isNotEmpty) {
+                return Column(
+                  children: userBloc.buildPlaces(snapshot.data.documents),
+                );
+              } else {
+                return Center(child: Text("Loading places..."));  // Show loading or placeholder
+              }
+            case ConnectionState.none:
+            default:
+              // In case there's no connection or it's an unknown state
+              return Center(child: Text("Something went wrong. Try again later."));  // Error message or placeholder
+          }
+        },
       ),
     );
   }
-
 }

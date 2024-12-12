@@ -8,7 +8,7 @@ class Place {
   String description;
   String urlImage;
   int likes;
-  User userOwner;
+  User userOwner; //reference to User model
 
   Place({
     required Key key,
@@ -17,6 +17,6 @@ class Place {
     required this.description,
     required this.urlImage,
     required this.likes,
-    required this.userOwner
+    required this.userOwner // userOwner is a reference to the User model
   });
 }

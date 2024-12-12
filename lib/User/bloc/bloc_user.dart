@@ -1,7 +1,11 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facetrip/Place/repository/firebase_storage_repository.dart';
+import 'package:facetrip/User/repository/cloud_firestore_api.dart';
+import 'package:facetrip/User/ui/widgets/profile_place.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/model/user.dart' as userModel;
 import 'package:facetrip/User/repository/auth_repository.dart';
@@ -34,6 +38,48 @@ class UserBloc implements Bloc {
   final _cloudFirestoreRepository = CloudFirestoreRepository();
   void updateUserData(userModel.User user) => _cloudFirestoreRepository.updateUserDataFirestore(user);
   Future<void> updatePlaceData(Place place) => _cloudFirestoreRepository.updatePlaceData(place);
+
+  // Firestore collection stream
+  Stream<QuerySnapshot> placesListStream = FirebaseFirestore.instance
+      .collection(CloudFirestoreAPI().PLACES)
+      .snapshots();
+
+  Stream<QuerySnapshot> get placesStream => placesListStream;
+
+  List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
+    return placesListSnapshot.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+
+      // Convert Firebase user to custom UserModel
+      User? firebaseUser = FirebaseAuth.instance.currentUser;
+      userModel.User currentUserModel = mapFirebaseUserToUserModel(firebaseUser!);
+
+      return ProfilePlace(
+        Place(
+          key: Key(doc.id), // Use doc.id as key
+          id: doc.id,
+          name: data['name'],
+          description: data['description'],
+          urlImage: data['urlImage'],
+          likes: data['likes'],
+          userOwner: currentUserModel, // Pass the mapped custom UserModel
+        ),
+      );
+    }).toList();
+  }
+
+  // Convert firebase_auth.User to your custom UserModel
+  userModel.User mapFirebaseUserToUserModel(User firebaseUser) {
+    return userModel.User(
+      key: Key(firebaseUser.uid),
+      uid: firebaseUser.uid,
+      name: firebaseUser.displayName ?? 'Unknown',  // Use default value if null
+      email: firebaseUser.email ?? 'No Email',
+      photoURL: firebaseUser.photoURL ?? '',
+      myPlaces: [],
+      myFavoritePlaces: [],
+    );
+  }
 
   final _firebaseStorageRepository = FirebaseStorageRepository();
   Future<UploadTask> uploadFile(String path, File image){
