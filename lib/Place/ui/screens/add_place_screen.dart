@@ -164,6 +164,17 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                   child: ButtonPurple(
                     buttonText: "Add Place",
                     onPressed: () {
+
+                      //1. Firebase Storage
+                      //url -
+                      //Id del usuario logeado actualmente
+                      userBloc.currentUser().then((User? user){
+                        if(user != null){
+
+                        }
+                      });
+
+
                       if (currentUser != null) {
                         // Correctly create a User instance using the alias
                         user_model.User currentUserModel = user_model.User(
