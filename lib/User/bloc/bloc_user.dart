@@ -71,6 +71,11 @@ class UserBloc implements Bloc {
     }).toList();
   }
 
+   Stream<QuerySnapshot> myPlacesListStream(String uid) =>
+    FirebaseFirestore.instance.collection(CloudFirestoreAPI().PLACES).where(
+        "userOwner", isEqualTo: FirebaseFirestore.instance.doc(
+        "${CloudFirestoreAPI().USERS}/${uid}")).snapshots();
+
   // Convert firebase_auth.User to your custom UserModel
   userModel.User mapFirebaseUserToUserModel(User firebaseUser) {
     return userModel.User(

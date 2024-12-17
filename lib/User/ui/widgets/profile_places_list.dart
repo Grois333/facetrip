@@ -7,6 +7,8 @@ import 'package:facetrip/Place/model/place.dart';
 
 class ProfilePlacesList extends StatelessWidget {
   late UserBloc userBloc;
+  late User user;
+  ProfilePlacesList(this.user);
 
   Place place = Place(
     key: UniqueKey(),
@@ -56,7 +58,7 @@ class ProfilePlacesList extends StatelessWidget {
         bottom: 10.0,
       ),
       child: StreamBuilder(
-        stream: userBloc.placesStream,
+        stream: userBloc.myPlacesListStream(user.uid.toString()),
         builder: (context, AsyncSnapshot snapshot) {
           // Handle different connection states
           switch (snapshot.connectionState) {
