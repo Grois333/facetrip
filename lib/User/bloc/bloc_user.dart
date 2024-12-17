@@ -46,6 +46,9 @@ class UserBloc implements Bloc {
 
   Stream<QuerySnapshot> get placesStream => placesListStream;
 
+  //List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreRepository.buildPlaces(placesListSnapshot);
+
+
   List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
     return placesListSnapshot.map((doc) {
       final data = doc.data() as Map<String, dynamic>;

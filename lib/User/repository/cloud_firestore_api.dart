@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facetrip/User/model/user.dart';
+import 'package:facetrip/User/ui/widgets/profile_place.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/material.dart';
 import '../../Place/model/place.dart';
 
 class CloudFirestoreAPI{
@@ -35,6 +37,7 @@ class CloudFirestoreAPI{
         'name': place.name,
         'description': place.description,
         'likes': place.likes,
+        'urlImage': place.urlImage,
         'userOwner': _db.doc("$USERS/${user.uid}"),
       }).then((dr){
         dr.get().then((snapshot){
@@ -46,6 +49,41 @@ class CloudFirestoreAPI{
         });
       });
     }
+  }
+
+  // Build a list of ProfilePlace widgets from Firestore snapshots
+  List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
+    List<ProfilePlace> profilePlaces = [];
+    placesListSnapshot.forEach((p) {
+      Map<String, dynamic>? data = p.data() as Map<String, dynamic>?;
+      if (data != null) {
+        profilePlaces.add(
+          ProfilePlace(
+            Place(
+              key: UniqueKey(),
+              id: p.id, // Use Firestore document ID as the ID
+              name: data['name'] ?? 'Unnamed Place',
+              description: data['description'] ?? 'No description available',
+              urlImage: data['urlImage'] ?? '', // Provide default URL if missing
+              likes: data['likes'] ?? 0,
+              userOwner: User(
+                key: UniqueKey(),
+                uid: data['userOwner'] != null
+                    ? (data['userOwner'] as DocumentReference).id
+                    : 'Unknown Owner',
+                name: 'Unknown', // Default values if owner data is incomplete
+                email: '',
+                photoURL: '',
+                myPlaces: [],
+                myFavoritePlaces: [],
+              ),
+            ),
+          ),
+        );
+      }
+    });
+
+    return profilePlaces;
   }
 
 }

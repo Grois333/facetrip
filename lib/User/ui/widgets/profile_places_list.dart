@@ -61,29 +61,28 @@ class ProfilePlacesList extends StatelessWidget {
           // Handle different connection states
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
-              return Center(child: CircularProgressIndicator());  // While waiting for data
-            case ConnectionState.done:
-              // When the stream is done, build the places list
-              if (snapshot.hasData && snapshot.data.documents.isNotEmpty) {
-                return Column(
-                  children: userBloc.buildPlaces(snapshot.data.documents),
-                );
-              } else {
-                return Center(child: Text("No places available."));  // If no data found
-              }
+              return const Center(child: CircularProgressIndicator()); // While waiting for data
             case ConnectionState.active:
-              // Handle active connection state (when data is streaming)
-              if (snapshot.hasData && snapshot.data.documents.isNotEmpty) {
+            case ConnectionState.done:
+              if (snapshot.hasData && snapshot.data.docs.isNotEmpty) {
+                // Use `docs` instead of `documents` and pass it to `buildPlaces`
                 return Column(
-                  children: userBloc.buildPlaces(snapshot.data.documents),
+                  children: userBloc.buildPlaces(snapshot.data.docs),
                 );
               } else {
-                return Center(child: Text("Loading places..."));  // Show loading or placeholder
+                return const Center(
+                  child: Text(""),
+                  //child: Text("No places available."), // Show message if no places are found
+                );
               }
             case ConnectionState.none:
+              return const Center(
+                child: Text("No connection available."), // Handle no connection
+              );
             default:
-              // In case there's no connection or it's an unknown state
-              return Center(child: Text("Something went wrong. Try again later."));  // Error message or placeholder
+              return const Center(
+                child: Text("Something went wrong. Try again later."),
+              );
           }
         },
       ),

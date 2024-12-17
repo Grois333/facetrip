@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:facetrip/User/ui/widgets/profile_place.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:facetrip/User/model/user.dart';
 import 'package:facetrip/User/repository/cloud_firestore_api.dart';
@@ -10,5 +11,7 @@ class CloudFirestoreRepository {
 
   void updateUserDataFirestore(User user) => _cloudFirestoreAPI.updateUserData(user);
   Future<void> updatePlaceData(Place place) => _cloudFirestoreAPI.updatePlaceData(place);
+
+  List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreAPI.buildPlaces(placesListSnapshot);
 
 }
