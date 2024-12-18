@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:facetrip/Place/ui/widgets/card_image.dart';
 import 'package:facetrip/User/model/user.dart';
 import 'package:facetrip/User/ui/widgets/profile_place.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -52,7 +53,7 @@ class CloudFirestoreAPI{
   }
 
   // Build a list of ProfilePlace widgets from Firestore snapshots
-  List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
+  List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) {
     List<ProfilePlace> profilePlaces = [];
     placesListSnapshot.forEach((p) {
       Map<String, dynamic>? data = p.data() as Map<String, dynamic>?;
@@ -85,5 +86,34 @@ class CloudFirestoreAPI{
 
     return profilePlaces;
   }
+
+  List<CardImageWithFabIcon> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
+    List<CardImageWithFabIcon> placesCard = [];
+    double width = 300.0;
+    double height = 350.0;
+    double left = 20.0;
+    IconData iconData = Icons.favorite_border;
+
+    for (var p in placesListSnapshot) {
+      // Safely cast p.data() to a Map
+      Map<String, dynamic>? data = p.data() as Map<String, dynamic>?;
+
+      if (data != null) {
+        placesCard.add(CardImageWithFabIcon(
+          pathImage: data["urlImage"] ?? "", // Provide a default value
+          width: width,
+          height: height,
+          left: left,
+          onPressedFabIcon: () {
+            // Handle onPressed action
+          },
+          iconData: iconData,
+        ));
+      }
+    }
+
+    return placesCard; // Add this return statement
+  }
+
 
 }

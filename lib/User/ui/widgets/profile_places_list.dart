@@ -69,7 +69,7 @@ class ProfilePlacesList extends StatelessWidget {
               if (snapshot.hasData && snapshot.data.docs.isNotEmpty) {
                 // Use `docs` instead of `documents` and pass it to `buildPlaces`
                 return Column(
-                  children: userBloc.buildPlaces(snapshot.data.docs),
+                  children: userBloc.buildMyPlaces(snapshot.data.docs),
                 );
               } else {
                 return const Center(

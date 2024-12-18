@@ -1,50 +1,41 @@
 import 'package:flutter/material.dart';
-import 'card_image.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:facetrip/Place/ui/widgets/card_image.dart';
+import 'package:facetrip/User/bloc/bloc_user.dart';
 
 class CardImageList extends StatelessWidget {
+  late UserBloc userBloc;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    double width = 300.0;
-    double height = 250.0;
-    double left = 20.0;
+    userBloc = BlocProvider.of<UserBloc>(context);
 
     return Container(
+      margin: const EdgeInsets.only(top: 50.0), // Adds space above the list
       height: 350.0,
-      child: ListView(
-        padding: EdgeInsets.all(50.0),
-        scrollDirection: Axis.horizontal,
-        children: <Widget>[
-          CardImageWithFabIcon(pathImage: "assets/img/beach_palm.jpeg", iconData: Icons.favorite_border,
-            width: width,
-            height: height,
-            onPressedFabIcon: () => {},
-            left: left,
-            ),
-          CardImageWithFabIcon(pathImage:"assets/img/mountain.jpeg", iconData: Icons.favorite_border,
-            width: width,
-            height: height,
-            onPressedFabIcon: () => {},
-            left: left,),
-          CardImageWithFabIcon(pathImage:"assets/img/mountain_stars.jpeg", iconData: Icons.favorite_border,
-            width: width,
-            height: height,
-            onPressedFabIcon: () => {},
-            left: left,),
-          CardImageWithFabIcon(pathImage:"assets/img/river.jpeg", iconData: Icons.favorite_border,
-            width: width,
-            height: height,
-            onPressedFabIcon: () => {},
-            left: left,),
-          CardImageWithFabIcon(pathImage:"assets/img/sunset.jpeg", iconData: Icons.favorite_border,
-            width: width,
-            height: height,
-            onPressedFabIcon: () => {},
-            left: left,),
-        ],
+      child: StreamBuilder(
+        stream: userBloc.placesStream,
+        builder: (context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+            case ConnectionState.none:
+              return Center(child: CircularProgressIndicator());
+            case ConnectionState.active:
+            case ConnectionState.done:
+              return listViewPlaces(userBloc.buildPlaces(snapshot.data.docs));
+            default:
+              return Center(child: Text('Unexpected state'));
+          }
+        },
       ),
     );
   }
 
+  Widget listViewPlaces(List<CardImageWithFabIcon> placesCard) {
+    return ListView(
+      padding: const EdgeInsets.only(top: 25.0, bottom: 100.0), // Space above and below the items
+      scrollDirection: Axis.horizontal,
+      children: placesCard,
+    );
+  }
 }

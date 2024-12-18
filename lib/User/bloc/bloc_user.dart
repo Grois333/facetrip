@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facetrip/Place/repository/firebase_storage_repository.dart';
+import 'package:facetrip/Place/ui/widgets/card_image.dart';
 import 'package:facetrip/User/repository/cloud_firestore_api.dart';
 import 'package:facetrip/User/ui/widgets/profile_place.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -49,7 +50,7 @@ class UserBloc implements Bloc {
   //List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreRepository.buildPlaces(placesListSnapshot);
 
 
-  List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
+  List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) {
     return placesListSnapshot.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
 
@@ -70,6 +71,8 @@ class UserBloc implements Bloc {
       );
     }).toList();
   }
+
+  List<CardImageWithFabIcon> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreRepository.buildPlaces(placesListSnapshot);
 
    Stream<QuerySnapshot> myPlacesListStream(String uid) =>
     FirebaseFirestore.instance.collection(CloudFirestoreAPI().PLACES).where(
