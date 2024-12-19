@@ -99,6 +99,15 @@ class UserBloc implements Bloc {
     return _firebaseStorageRepository.uploadFile(path, image);
   }
 
+  final _cloudFirestoreAPI = CloudFirestoreAPI(); // Add this line
+  List<Place> buildPlaceObjects(List<DocumentSnapshot> placesListSnapshot) {
+    return _cloudFirestoreAPI.buildPlaceObjects(placesListSnapshot);
+  }
+
+  Future<void> likePlace(String idPlace, bool isLiked) {
+    return _cloudFirestoreAPI.likePlace(idPlace, isLiked);
+  }
+
   signOut() {
     _auth_repository.signOut();
   }

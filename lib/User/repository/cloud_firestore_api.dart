@@ -92,28 +92,95 @@ class CloudFirestoreAPI{
     double width = 300.0;
     double height = 350.0;
     double left = 20.0;
-    IconData iconData = Icons.favorite_border;
 
     for (var p in placesListSnapshot) {
-      // Safely cast p.data() to a Map
       Map<String, dynamic>? data = p.data() as Map<String, dynamic>?;
 
       if (data != null) {
+        bool isLiked = (data['likes'] ?? 0) == 1; // Determine if the place is liked (1 = liked, 0 = not liked)
+
         placesCard.add(CardImageWithFabIcon(
-          pathImage: data["urlImage"] ?? "", // Provide a default value
+          pathImage: data["urlImage"] ?? "",
           width: width,
           height: height,
           left: left,
           onPressedFabIcon: () {
-            // Handle onPressed action
+            // Toggle the liked state and update Firestore
+            likePlace(p.id, !isLiked); 
           },
-          iconData: iconData,
+          iconData: isLiked ? Icons.favorite : Icons.favorite_border, // Display heart icon based on state
         ));
       }
     }
 
-    return placesCard; // Add this return statement
+    return placesCard;
   }
+
+  List<Place> buildPlaceObjects(List<DocumentSnapshot> placesListSnapshot) {
+  return placesListSnapshot.map((p) {
+    Map<String, dynamic>? data = p.data() as Map<String, dynamic>?;
+
+    if (data != null) {
+      return Place(
+        key: UniqueKey(),
+        id: p.id, // Use Firestore document ID as the ID
+        name: data['name'] ?? 'Unnamed Place',
+        description: data['description'] ?? 'No description available',
+        urlImage: data['urlImage'] ?? '', // Provide default URL if missing
+        likes: data['likes'] ?? 0,
+        liked: (data['likes'] ?? 0) == 1, // Determine liked state
+        userOwner: User(
+                key: UniqueKey(),
+                uid: data['userOwner'] != null
+                    ? (data['userOwner'] as DocumentReference).id
+                    : 'Unknown Owner',
+                name: 'Unknown', // Default values if owner data is incomplete
+                email: '',
+                photoURL: '',
+                myPlaces: [],
+                myFavoritePlaces: [],
+        )
+      );
+    } else {
+      return Place(
+        key: UniqueKey(),
+        id: '',
+        name: 'Unknown',
+        description: 'No data available',
+        urlImage: '',
+        likes: 0,
+        liked: false,
+        userOwner: User(
+                key: UniqueKey(),
+                uid: data?['userOwner'] != null
+                    ? (data?['userOwner'] as DocumentReference).id
+                    : 'Unknown Owner',
+                name: 'Unknown', // Default values if owner data is incomplete
+                email: '',
+                photoURL: '',
+                myPlaces: [],
+                myFavoritePlaces: [],
+        )
+      );
+    }
+  }).toList();
+}
+
+
+
+
+  Future<void> likePlace(String idPlace, bool isLiked) async {
+    try {
+      // Update the 'likes' field based on the toggled value
+      await _db.collection(PLACES).doc(idPlace).update({
+        'likes': isLiked ? 1 : 0, // 1 if liked, 0 if not liked
+      });
+    } catch (e) {
+      print("Error toggling like for place: $e");
+    }
+  }
+
+
 
 
 }

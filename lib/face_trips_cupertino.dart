@@ -32,7 +32,12 @@ class FaceTripsCupertino extends StatelessWidget {
           switch (index) {
             case 0:
               return CupertinoTabView(
-                builder: (BuildContext context) => HomeTrips(),
+                builder: (BuildContext context) {
+                    return BlocProvider(
+                            bloc: UserBloc(),
+                            child: HomeTrips(),
+                    );
+                },
               );
             case 1:
               return CupertinoTabView(
