@@ -47,28 +47,31 @@ class _CardImageListState extends State<CardImageList> {
   }
 
   Widget listViewPlaces(List<Place> places) {
-    void toggleLiked(Place place) {
-      setState(() {
-        place.liked = !place.liked; // Toggle liked state in the UI
-        userBloc.likePlace(place.id, place.liked); // Call updated likePlace
-      });
-    }
-
     return ListView(
       padding: const EdgeInsets.only(top: 25.0, bottom: 100.0),
       scrollDirection: Axis.horizontal,
       children: places.map((place) {
-        return CardImageWithFabIcon(
-          pathImage: place.urlImage,
-          width: 300.0,
-          height: 250.0,
-          left: 20.0,
-          iconData: place.liked ? Icons.favorite : Icons.favorite_border,
-          onPressedFabIcon: () {
-            toggleLiked(place);
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return CardImageWithFabIcon(
+              pathImage: place.urlImage,
+              width: 300.0,
+              height: 250.0,
+              left: 20.0,
+              iconData: place.liked ? Icons.favorite : Icons.favorite_border,
+              onPressedFabIcon: () {
+                setState(() {
+                  place.liked = !place.liked; // Toggle liked state
+                  userBloc.likePlace(place.id, place.liked); // Update Firestore
+                });
+              },
+            );
           },
         );
       }).toList(),
     );
   }
+
+
+
 }
