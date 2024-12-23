@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facetrip/Place/model/place.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class ProfilePlace extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           fit: BoxFit.cover,
-          image: NetworkImage(place.urlImage),
+          image: CachedNetworkImageProvider(place.urlImage), // Use cached images
         ),
         borderRadius: BorderRadius.all(Radius.circular(20.0)),
         color: Colors.red,
@@ -37,7 +38,7 @@ class ProfilePlace extends StatelessWidget {
       alignment: Alignment(0.0, 0.8),
       children: <Widget>[
         photoCard,
-        ProfilePlaceInfo(place: place, userBloc: userBloc),  // Pass both place and userBloc
+        ProfilePlaceInfo(place: place, userBloc: userBloc), // Pass both place and userBloc
       ],
     );
   }

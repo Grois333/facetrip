@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '/widgets/floating_action_button_green.dart';
 
@@ -8,6 +9,7 @@ class CardImageWithFabIcon extends StatelessWidget {
   final String pathImage; // URL of the image from Firebase Storage
   final VoidCallback onPressedFabIcon;
   final IconData iconData;
+  final bool isNetworkImage; // New flag to differentiate image source
 
   CardImageWithFabIcon({
     required this.pathImage,
@@ -16,6 +18,7 @@ class CardImageWithFabIcon extends StatelessWidget {
     required this.onPressedFabIcon,
     required this.iconData,
     required this.left,
+    this.isNetworkImage = true, // Default to network image
   });
 
   @override
@@ -26,11 +29,10 @@ class CardImageWithFabIcon extends StatelessWidget {
       margin: EdgeInsets.only(left: left),
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage(pathImage), // Always treat pathImage as a network URL
+          image: isNetworkImage
+              ? CachedNetworkImageProvider(pathImage) // Cached for network images
+              : AssetImage(pathImage) as ImageProvider, // Use AssetImage for local images
           fit: BoxFit.cover,
-          onError: (exception, stackTrace) {
-            debugPrint("Error loading image: $exception");
-          },
         ),
         borderRadius: BorderRadius.all(Radius.circular(10.0)),
         shape: BoxShape.rectangle,
