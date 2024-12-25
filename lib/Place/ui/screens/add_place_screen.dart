@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:facetrip/Place/model/place.dart';
 import 'package:facetrip/Place/ui/widgets/card_image.dart';
-import 'package:facetrip/Place/ui/widgets/title_input_location.dart';
 import 'package:facetrip/widgets/button_purple.dart';
 import 'package:facetrip/widgets/text_input.dart';
 import 'package:facetrip/widgets/title_header.dart';
@@ -30,6 +29,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
   late TextEditingController _controllerDescriptionPlace;
   late File? _imageFile;
   bool _isSubmitting = false; // Track submission status
+  int _selectedStars = 0; // Variable to track star rating
 
   @override
   void initState() {
@@ -80,6 +80,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
           likes: 0,
           urlImage: imageUrl,
           userOwner: currentUserModel,
+          stars: _selectedStars, // Save the selected stars
         ));
 
         Navigator.pop(context);
@@ -93,6 +94,26 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
     } else {
       print("No image selected.");
     }
+  }
+
+  Widget _buildStarRating() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedStars = index + 1; // Update the star rating
+            });
+          },
+          child: Icon(
+            Icons.star,
+            color: index < _selectedStars ? Colors.amber : Colors.grey,
+            size: 40.0,
+          ),
+        );
+      }),
+    );
   }
 
   @override
@@ -175,10 +196,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                 ),
                 Container(
                   margin: EdgeInsets.only(top: 20.0),
-                  child: TextInputLocation(
-                    hintText: "Add Location",
-                    iconData: Icons.location_on,
-                  ),
+                  child: _buildStarRating(), // Add the star rating widget here
                 ),
                 Container(
                   width: 70.0,
