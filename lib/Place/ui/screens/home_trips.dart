@@ -15,12 +15,31 @@ class _HomeTripsState extends State<HomeTrips> {
   Place? selectedPlace;
 
   @override
+  void initState() {
+    super.initState();
+
+    // Initialize with the first place when the widget loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userBloc = BlocProvider.of<UserBloc>(context);
+      userBloc.placesStream.first.then((snapshot) {
+        final places = userBloc.buildPlaceObjects(snapshot.docs);
+        if (places.isNotEmpty) {
+          setState(() {
+            selectedPlace = places.first;
+          });
+        }
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final UserBloc userBloc = BlocProvider.of<UserBloc>(context);
 
     return StreamBuilder<Place>(
       stream: userBloc.placeSelectedStream,
       builder: (context, snapshot) {
+        // Update selectedPlace whenever a new place is selected
         if (snapshot.hasData) {
           selectedPlace = snapshot.data;
         }
@@ -32,8 +51,7 @@ class _HomeTripsState extends State<HomeTrips> {
                 DescriptionPlace(
                   selectedPlace?.name ?? "Bahamas",
                   4,
-                  selectedPlace?.description ??
-                      "Default description for the selected place.",
+                  selectedPlace?.description ?? "Default description for the selected place.",
                 ),
                 ReviewList(),
               ],
