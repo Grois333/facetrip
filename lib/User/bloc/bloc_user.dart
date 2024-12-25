@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -108,12 +109,20 @@ class UserBloc implements Bloc {
     return _cloudFirestoreAPI.likePlace(idPlace, isLiked);
   }
 
+  // StreamController for the selected place
+  final StreamController<Place> _placeSelectedStreamController = StreamController<Place>.broadcast();
+
+  // Expose the stream and sink
+  Stream<Place> get placeSelectedStream => _placeSelectedStreamController.stream;
+  StreamSink<Place> get placeSelectedSink => _placeSelectedStreamController.sink;
+
   signOut() {
     _auth_repository.signOut();
   }
 
   @override
   void dispose() {
-    // Dispose logic if needed
+     _placeSelectedStreamController.close();
+    // Dispose other resources if needed
   }
 }

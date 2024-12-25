@@ -51,27 +51,25 @@ class _CardImageListState extends State<CardImageList> {
       padding: const EdgeInsets.only(top: 25.0, bottom: 100.0),
       scrollDirection: Axis.horizontal,
       children: places.map((place) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return CardImageWithFabIcon(
-              pathImage: place.urlImage,
-              width: 300.0,
-              height: 250.0,
-              left: 20.0,
-              iconData: place.liked ? Icons.favorite : Icons.favorite_border,
-              onPressedFabIcon: () {
-                setState(() {
-                  place.liked = !place.liked; // Toggle liked state
-                  userBloc.likePlace(place.id, place.liked); // Update Firestore
-                });
-              },
-            );
+        return GestureDetector(
+          onTap: () {
+            userBloc.placeSelectedSink.add(place); // Send the tapped place
           },
+          child: CardImageWithFabIcon(
+            pathImage: place.urlImage,
+            width: 300.0,
+            height: 250.0,
+            left: 20.0,
+            iconData: place.liked ? Icons.favorite : Icons.favorite_border,
+            onPressedFabIcon: () {
+              setState(() {
+                place.liked = !place.liked; // Toggle liked state
+                userBloc.likePlace(place.id, place.liked); // Update Firestore
+              });
+            },
+          ),
         );
       }).toList(),
     );
   }
-
-
-
 }
