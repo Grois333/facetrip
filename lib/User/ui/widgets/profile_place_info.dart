@@ -63,14 +63,29 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
       ),
     );
 
-    final steps = Text(
-      'Heart ${widget.place.likes}',
-      style: TextStyle(
-        fontFamily: 'Lato',
-        fontSize: 14.0,
-        fontWeight: FontWeight.bold,
-        color: Colors.amber,
-      ),
+    // Ensure stars are between 0 and 5 and print the value for debugging
+    int stars = widget.place.stars ?? 0;
+    stars = stars.clamp(0, 5);  // Ensure stars are between 0 and 5
+
+    print("Stars value: $stars");  // Debugging the stars value
+
+    // Display the stars based on the place's stars rating
+    final starIcons = Row(
+      children: List.generate(5, (index) {
+        if (index < stars) {
+          return Icon(
+            Icons.star,
+            color: Colors.amber,
+            size: 20.0,
+          );
+        } else {
+          return Icon(
+            Icons.star_border,
+            color: Colors.amber,
+            size: 20.0,
+          );
+        }
+      }),
     );
 
     final card = Container(
@@ -93,7 +108,7 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
           children: <Widget>[
             place,
             placeInfo,
-            steps,
+            starIcons,  // Add star rating here
           ],
         ),
       ),

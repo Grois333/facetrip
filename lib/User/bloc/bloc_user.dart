@@ -67,6 +67,7 @@ class UserBloc implements Bloc {
           description: data['description'],
           urlImage: data['urlImage'],
           likes: data['likes'],
+          stars: data['stars'] ?? 0,
           userOwner: currentUserModel, // Pass the mapped custom UserModel
         ),
       );
