@@ -30,22 +30,23 @@ class CloudFirestoreAPI{
   Future<void> updatePlaceData(Place place) async {
     CollectionReference refPlaces = _db.collection(PLACES);
 
-    auth.User? user= _auth.currentUser;
-    if (user == null){
+    auth.User? user = _auth.currentUser;
+    if (user == null) {
       return print("user is null");
-    }else{
+    } else {
       refPlaces.add({
         'name': place.name,
         'description': place.description,
         'likes': place.likes,
         'urlImage': place.urlImage,
+        'stars': place.stars, // Include the stars rating
         'userOwner': _db.doc("$USERS/${user.uid}"),
-      }).then((dr){
-        dr.get().then((snapshot){
-          snapshot.id;// ID Places
+      }).then((dr) {
+        dr.get().then((snapshot) {
+          snapshot.id; // ID Places
           DocumentReference refUsers = _db.collection(USERS).doc(user.uid);
           refUsers.update({
-            'myPlacces': FieldValue.arrayUnion([_db.doc("$PLACES/${snapshot.id}")])
+            'myPlaces': FieldValue.arrayUnion([_db.doc("$PLACES/${snapshot.id}")])
           });
         });
       });
@@ -129,6 +130,7 @@ class CloudFirestoreAPI{
         urlImage: data['urlImage'] ?? '', // Provide default URL if missing
         likes: data['likes'] ?? 0,
         liked: (data['likes'] ?? 0) == 1, // Determine liked state
+        stars: data['stars'] is int ? data['stars'] : int.tryParse(data['stars'].toString()) ?? 0,
         userOwner: User(
                 key: UniqueKey(),
                 uid: data['userOwner'] != null

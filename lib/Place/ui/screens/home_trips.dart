@@ -42,15 +42,20 @@ class _HomeTripsState extends State<HomeTrips> {
         // Update selectedPlace whenever a new place is selected
         if (snapshot.hasData) {
           selectedPlace = snapshot.data;
+
+          // Print the selectedPlace to debug
+          print('Selected Place: ${selectedPlace?.name}, Stars: ${selectedPlace?.stars}');
+
         }
 
         return Stack(
           children: <Widget>[
             ListView(
               children: <Widget>[
+                // Pass the stars value dynamically from selectedPlace
                 DescriptionPlace(
                   selectedPlace?.name ?? "Bahamas",
-                  4,
+                  selectedPlace?.stars ?? 1, // Use stars from Firestore data
                   selectedPlace?.description ?? "Default description for the selected place.",
                 ),
                 ReviewList(),
