@@ -53,7 +53,10 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
+        print("Captured image path: ${_imageFile!.path}");
       });
+    } else {
+      print("No image captured.");
     }
   }
 
@@ -152,17 +155,35 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
             margin: EdgeInsets.only(top: 120.0, bottom: 20.0),
             child: ListView(
               children: <Widget>[
+                
                 Container(
                   alignment: Alignment.center,
                   child: Stack(
                     children: [
-                      CardImageWithFabIcon(
-                        pathImage: _imageFile?.path ?? "",
-                        iconData: Icons.favorite_border,
-                        width: 350.0,
-                        height: 250.0,
-                        onPressedFabIcon: () {},
-                        left: 0,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: _imageFile != null && _imageFile!.path.isNotEmpty
+                            ? Image.file(
+                                _imageFile!,  // Use the File object directly
+                                width: 350.0,
+                                height: 250.0,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 350.0,
+                                height: 250.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,  // Transparent background for the empty card
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black38,  // Custom shadow color
+                                      blurRadius: 15.0,  // Soft blur effect
+                                      offset: Offset(0.0, 7.0),  // Shadow direction and spread
+                                    ),
+                                  ],
+                                ),
+                              ),
                       ),
                       Positioned(
                         top: 10.0,
@@ -179,6 +200,10 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
                     ],
                   ),
                 ),
+
+
+
+
                 Container(
                   margin: EdgeInsets.only(top: 20.0, bottom: 20.0),
                   child: TextInput(
