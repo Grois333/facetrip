@@ -22,7 +22,7 @@ class CloudFirestoreAPI{
       'email': user.email,
       'photoURL': user.photoURL,
       'myPlaces': user.myPlaces,
-      'muFavoritePlaces': user.myFavoritePlaces,
+      'myFavoritePlaces': user.myFavoritePlaces,
       'lastSignIn': DateTime.now()
     }, SetOptions(merge: true));
   }
@@ -30,28 +30,35 @@ class CloudFirestoreAPI{
   Future<void> updatePlaceData(Place place) async {
     CollectionReference refPlaces = _db.collection(PLACES);
 
-    auth.User? user = _auth.currentUser;
-    if (user == null) {
-      return print("user is null");
-    } else {
-      refPlaces.add({
+    try {
+      auth.User? user = _auth.currentUser;
+      if (user == null) {
+        throw Exception("User is not authenticated.");
+      }
+
+      // Add the new place
+      DocumentReference placeRef = await refPlaces.add({
         'name': place.name,
         'description': place.description,
         'likes': place.likes,
         'urlImage': place.urlImage,
-        'stars': place.stars, // Include the stars rating
+        'stars': place.stars, // Include stars
         'userOwner': _db.doc("$USERS/${user.uid}"),
-      }).then((dr) {
-        dr.get().then((snapshot) {
-          snapshot.id; // ID Places
-          DocumentReference refUsers = _db.collection(USERS).doc(user.uid);
-          refUsers.update({
-            'myPlaces': FieldValue.arrayUnion([_db.doc("$PLACES/${snapshot.id}")])
-          });
-        });
       });
+
+      // Safely update the user's `myPlaces`
+      DocumentReference userRef = _db.collection(USERS).doc(user.uid);
+      await userRef.update({
+        'myPlaces': FieldValue.arrayUnion([placeRef.path]) // Save path as a string
+      });
+
+      print("Place added successfully: ${placeRef.id}");
+    } catch (e) {
+      print("Error in updatePlaceData: $e");
     }
   }
+
+
 
   // Build a list of ProfilePlace widgets from Firestore snapshots
   List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) {

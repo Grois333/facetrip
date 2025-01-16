@@ -5,6 +5,7 @@ import 'package:facetrip/Place/ui/widgets/review_list.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 import 'package:facetrip/Place/model/place.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import for Firebase access
 
 class HomeTrips extends StatefulWidget {
   @override
@@ -13,6 +14,9 @@ class HomeTrips extends StatefulWidget {
 
 class _HomeTripsState extends State<HomeTrips> {
   Place? selectedPlace;
+  String userPhotoUrl = ''; // User's photo URL
+  String userName = ''; // User's name
+  int numberOfPlaces = 0; // Use myPlaces count
 
   @override
   void initState() {
@@ -29,6 +33,14 @@ class _HomeTripsState extends State<HomeTrips> {
           });
         }
       });
+
+      // Get user info (photo URL, name)
+      userBloc.userInfoStream.first.then((userSnapshot) {
+        setState(() {
+          userPhotoUrl = userSnapshot.photoURL ?? ''; // Set photo URL
+          userName = userSnapshot.name ?? ''; // Set user name
+        });
+      });
     });
   }
 
@@ -43,9 +55,14 @@ class _HomeTripsState extends State<HomeTrips> {
         if (snapshot.hasData) {
           selectedPlace = snapshot.data;
 
-          // Print the selectedPlace to debug
-          print('Selected Place: ${selectedPlace?.name}, Stars: ${selectedPlace?.stars}');
+          // Fetch and print the user's total places count
+          if (selectedPlace != null) {
+            _printUserTotalPlaces(userBloc, selectedPlace!.userOwner.uid);
 
+          }
+
+          // Debugging the selectedPlace
+          print('Selected Place: ${selectedPlace?.name}, Stars: ${selectedPlace?.stars}');
         }
 
         return Stack(
@@ -58,7 +75,12 @@ class _HomeTripsState extends State<HomeTrips> {
                   selectedPlace?.stars ?? 1, // Use stars from Firestore data
                   selectedPlace?.description ?? "Default description for the selected place.",
                 ),
-                ReviewList(),
+                // Pass user data dynamically to the ReviewList widget
+                ReviewList(
+                  userPhotoUrl: userPhotoUrl,
+                  userName: userName,
+                  selectedPlace: selectedPlace,
+                ),
               ],
             ),
             HeaderAppBar(),
@@ -66,5 +88,16 @@ class _HomeTripsState extends State<HomeTrips> {
         );
       },
     );
+  }
+
+  // Function to fetch and print the total places count for a user
+  Future<void> _printUserTotalPlaces(UserBloc userBloc, String userOwnerId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userOwnerId).get();
+      final myPlaces = userDoc['myPlaces'] ?? [];
+      print('User $userOwnerId has ${myPlaces.length} places in total.');
+    } catch (e) {
+      print('Error fetching user places: $e');
+    }
   }
 }
