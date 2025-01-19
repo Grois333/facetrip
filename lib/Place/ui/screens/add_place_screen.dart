@@ -80,7 +80,7 @@ class _AddPlaceScreen extends State<AddPlaceScreen> {
           id: "1",
           name: _controllerTitlePlace.text,
           description: _controllerDescriptionPlace.text,
-          likes: 0,
+          likes: [],
           urlImage: imageUrl,
           userOwner: currentUserModel,
           stars: _selectedStars, // Save the selected stars

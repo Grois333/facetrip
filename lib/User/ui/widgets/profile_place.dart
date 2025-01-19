@@ -23,7 +23,7 @@ class ProfilePlace extends StatelessWidget {
           image: CachedNetworkImageProvider(place.urlImage), // Use cached images
         ),
         borderRadius: BorderRadius.all(Radius.circular(20.0)),
-        color: Colors.red,
+        color: Colors.grey,
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black38,

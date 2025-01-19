@@ -14,23 +14,60 @@ class ProfilePlaceInfo extends StatefulWidget {
 }
 
 class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
-  late bool isLiked;
+  //late bool isLiked;
+  late bool isLiked = false; // Initialize with default value
 
   @override
   void initState() {
     super.initState();
     // Update this to reflect the correct "liked" state based on the number of likes.
-    isLiked = widget.place.likes > 0;  // If likes are more than 0, it's considered liked
+    //isLiked = widget.place.likes > 0;  // If likes are more than 0, it's considered liked
+    _checkIfLiked(); // Initialize the liked state based on Firestore data
+  }
+
+  Future<void> _checkIfLiked() async {
+    final currentUser = await widget.userBloc.currentUser();
+    if (currentUser != null) {
+      setState(() {
+        isLiked = widget.place.likes.contains(currentUser.uid); // Update isLiked based on current user
+      });
+    }
   }
 
   // Toggle like state and update Firestore
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked; // Toggle the like state
-      widget.place.liked = isLiked; // Update the local place's liked state
-      widget.userBloc.likePlace(widget.place.id, isLiked); // Update Firestore with like state
-    });
+  // void toggleLike() {
+  //   setState(() {
+  //     isLiked = !isLiked; // Toggle the like state
+  //     widget.place.liked = isLiked; // Update the local place's liked state
+  //     widget.userBloc.likePlace(widget.place.id, isLiked); // Update Firestore with like state
+  //   });
+  // }
+  Future<void> _toggleLike() async {
+    final currentUser = await widget.userBloc.currentUser();
+    if (currentUser != null) {
+      setState(() {
+        // Cast to List<String> explicitly
+        final likesList = widget.place.likes.cast<String>();
+
+        if (isLiked) {
+          // Remove the user's UID if it's already in the list
+          likesList.remove(currentUser.uid);
+        } else {
+          // Add the user's UID if it's not in the list
+          likesList.add(currentUser.uid);
+        }
+
+        // Update the place's likes and the isLiked state
+        widget.place.likes = likesList;
+        isLiked = !isLiked;
+      });
+
+      // Update Firestore with the new likes list
+      widget.userBloc.likePlace(widget.place.id, widget.place.likes.cast<String>());
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +157,7 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
         card,
         FloatingActionButtonGreen(
           iconData: isLiked ? Icons.favorite : Icons.favorite_border, // Toggle the icon
-          onPressed: toggleLike, // Pass the toggleLike function to onPressed
+          onPressed: _toggleLike, // Pass the toggleLike function to onPressed
         ),
       ],
     );

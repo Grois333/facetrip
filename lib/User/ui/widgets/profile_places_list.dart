@@ -16,7 +16,7 @@ class ProfilePlacesList extends StatelessWidget {
     name: "Knuckles Mountains Range",
     description: "Hiking. Water fall hunting. Natural bath",
     urlImage: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80",
-    likes: 3,
+    likes: [],
     userOwner: User(
       key: GlobalKey(),
       uid: "1",  // Example user ID
@@ -34,7 +34,7 @@ class ProfilePlacesList extends StatelessWidget {
     name: "Mountains",
     description: "Hiking. Water fall hunting. Natural bath, Scenery & Photography",
     urlImage: "https://images.unsplash.com/photo-1524654458049-e36be0721fa2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80",
-    likes: 10,
+    likes: [],
     userOwner: User(
       key: GlobalKey(),
       uid: "2",  // Example user ID

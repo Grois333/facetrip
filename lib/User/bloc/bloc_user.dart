@@ -217,13 +217,24 @@ class UserBloc implements Bloc {
   }
 
   final _cloudFirestoreAPI = CloudFirestoreAPI(); // Add this line
-  List<Place> buildPlaceObjects(List<DocumentSnapshot> placesListSnapshot) {
-    return _cloudFirestoreAPI.buildPlaceObjects(placesListSnapshot);
-  }
+    List<Place> buildPlaceObjects(List<DocumentSnapshot> placesListSnapshot) {
+      return _cloudFirestoreAPI.buildPlaceObjects(placesListSnapshot);
+    }
 
-  Future<void> likePlace(String idPlace, bool isLiked) {
-    return _cloudFirestoreAPI.likePlace(idPlace, isLiked);
-  }
+    // Future<void> likePlace(String idPlace, bool isLiked) {
+    //   return _cloudFirestoreAPI.likePlace(idPlace, isLiked);
+    // }
+    Future<void> likePlace(String placeId, List likes) async {
+      try {
+        await FirebaseFirestore.instance.collection('places').doc(placeId).update({
+          'likes': likes,
+        });
+      } catch (e) {
+        print("Error updating likes: $e");
+      }
+    }
+
+
 
   // StreamController for the selected place
   final StreamController<Place> _placeSelectedStreamController = StreamController<Place>.broadcast();

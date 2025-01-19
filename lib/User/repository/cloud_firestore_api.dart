@@ -107,17 +107,43 @@ class CloudFirestoreAPI{
       if (data != null) {
         bool isLiked = (data['likes'] ?? 0) == 1; // Determine if the place is liked (1 = liked, 0 = not liked)
 
+        // placesCard.add(CardImageWithFabIcon(
+        //   pathImage: data["urlImage"] ?? "",
+        //   width: width,
+        //   height: height,
+        //   left: left,
+        //   onPressedFabIcon: () {
+        //     // Toggle the liked state and update Firestore
+        //     likePlace(p.id, !isLiked); 
+        //   },
+        //   iconData: isLiked ? Icons.favorite : Icons.favorite_border, // Display heart icon based on state
+        // ));
+
         placesCard.add(CardImageWithFabIcon(
           pathImage: data["urlImage"] ?? "",
           width: width,
           height: height,
           left: left,
-          onPressedFabIcon: () {
-            // Toggle the liked state and update Firestore
-            likePlace(p.id, !isLiked); 
+
+          onPressedFabIcon: () async {
+            // Get the current user's ID
+            auth.User? currentUser = auth.FirebaseAuth.instance.currentUser;
+
+            if (currentUser != null) {
+              // Pass the user's ID to toggle like
+              await likePlace(p.id, currentUser.uid);
+            } else {
+              print("User not authenticated.");
+            }
           },
-          iconData: isLiked ? Icons.favorite : Icons.favorite_border, // Display heart icon based on state
+
+          
+          iconData: isLiked ? Icons.favorite : Icons.favorite_border,
         ));
+
+
+
+
       }
     }
 
@@ -157,7 +183,7 @@ class CloudFirestoreAPI{
         name: 'Unknown',
         description: 'No data available',
         urlImage: '',
-        likes: 0,
+        likes: [],
         liked: false,
         userOwner: User(
                 key: UniqueKey(),
@@ -178,16 +204,39 @@ class CloudFirestoreAPI{
 
 
 
-  Future<void> likePlace(String idPlace, bool isLiked) async {
+  // Future<void> likePlace(String idPlace, bool isLiked) async {
+  //   try {
+  //     // Update the 'likes' field based on the toggled value
+  //     await _db.collection(PLACES).doc(idPlace).update({
+  //       'likes': isLiked ? 1 : 0, // 1 if liked, 0 if not liked
+  //     });
+  //   } catch (e) {
+  //     print("Error toggling like for place: $e");
+  //   }
+  // }
+
+  Future<void> likePlace(String idPlace, String userId) async {
     try {
-      // Update the 'likes' field based on the toggled value
-      await _db.collection(PLACES).doc(idPlace).update({
-        'likes': isLiked ? 1 : 0, // 1 if liked, 0 if not liked
-      });
+      DocumentReference placeRef = _db.collection(PLACES).doc(idPlace);
+      DocumentSnapshot placeSnapshot = await placeRef.get();
+
+      if (placeSnapshot.exists) {
+        List<dynamic> likes = placeSnapshot['likes'] ?? [];
+
+        if (likes.contains(userId)) {
+          await placeRef.update({'likes': FieldValue.arrayRemove([userId])});
+        } else {
+          await placeRef.update({'likes': FieldValue.arrayUnion([userId])});
+        }
+      } else {
+        print("Place with ID $idPlace does not exist.");
+      }
     } catch (e) {
       print("Error toggling like for place: $e");
     }
   }
+
+
 
 
 

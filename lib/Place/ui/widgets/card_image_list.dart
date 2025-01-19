@@ -51,6 +51,9 @@ class _CardImageListState extends State<CardImageList> {
       padding: const EdgeInsets.only(top: 25.0, bottom: 100.0),
       scrollDirection: Axis.horizontal,
       children: places.map((place) {
+        // Determine if the current user has liked the place
+        final isLiked = place.likes.contains(widget.user.uid);
+
         return GestureDetector(
           onTap: () {
             userBloc.placeSelectedSink.add(place); // Send the tapped place
@@ -60,16 +63,37 @@ class _CardImageListState extends State<CardImageList> {
             width: 300.0,
             height: 250.0,
             left: 20.0,
-            iconData: place.liked ? Icons.favorite : Icons.favorite_border,
-            onPressedFabIcon: () {
-              setState(() {
-                place.liked = !place.liked; // Toggle liked state
-                userBloc.likePlace(place.id, place.liked); // Update Firestore
-              });
+            iconData: isLiked ? Icons.favorite : Icons.favorite_border, // Update based on likes
+
+            onPressedFabIcon: () async {
+              final currentUser = widget.user.uid;
+
+              if (currentUser != null) {
+                setState(() {
+                  final likesList = place.likes.cast<String>();
+
+                  // Toggle like state
+                  if (likesList.contains(currentUser)) {
+                    likesList.remove(currentUser); // Unlike
+                    place.liked = false; // Update the local state
+                  } else {
+                    likesList.add(currentUser); // Like
+                    place.liked = true; // Update the local state
+                  }
+
+                  place.likes = likesList; // Update the likes list
+                });
+
+                // Sync the updated likes list to Firestore
+                await userBloc.likePlace(place.id, place.likes.cast<String>());
+              }
             },
           ),
         );
       }).toList(),
     );
   }
+
+
+
 }

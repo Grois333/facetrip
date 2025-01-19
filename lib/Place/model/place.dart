@@ -6,7 +6,7 @@ class Place {
   String name;
   String description;
   String urlImage;
-  int likes;
+  List likes; // Change to list of user references
   bool liked;
   User userOwner;
   int stars; // New field for rating
@@ -17,7 +17,7 @@ class Place {
     required this.name,
     required this.description,
     required this.urlImage,
-    required this.likes,
+    this.likes = const [], // Default to an empty list
     this.liked = false,
     required this.userOwner,
     this.stars = 0, // Default rating is 0
