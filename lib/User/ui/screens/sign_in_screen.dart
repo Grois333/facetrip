@@ -65,34 +65,51 @@ class _SignInScreen extends State<SignInScreen> {
               
               ButtonGreen(
                 text: "Login with Gmail",
+
                 onPressed: () async {
                   userBloc.signOut(); // Clear existing session
                   try {
-                    // Use firebase_auth.User for Firebase's user type
                     firebase_auth.User? firebaseUser = await userBloc.signIn();
 
                     if (firebaseUser != null) {
-                      // Fetch existing user data
+                      print("Signed in as: ${firebaseUser.uid}");
+
+                      // Attempt to fetch the user from Firestore
                       User? existingUser = await userBloc.getUserData(firebaseUser.uid);
 
-                      // Map Firebase User to Local User model, merging existing data
-                      // userBloc.updateUserData(
-                      //   User(
-                      //     key: Key(firebaseUser.uid),
-                      //     uid: firebaseUser.uid,
-                      //     name: firebaseUser.displayName ?? "",
-                      //     email: firebaseUser.email ?? "",
-                      //     photoURL: firebaseUser.photoURL ?? "",
-                      //     myPlaces: existingUser?.myPlaces ?? [], // Use existing myPlaces if available
-                      //     myFavoritePlaces: existingUser?.myFavoritePlaces ?? [], // Use existing myFavoritePlaces
-                      //   ),
-                      // );
+                      if (existingUser == null) {
+                        print("No existing user found in Firestore for UID: ${firebaseUser.uid}. Creating new user.");
+                        
+                        // User doesn't exist, so create a new record
+                        userBloc.updateUserData(
+                          User(
+                            key: Key(firebaseUser.uid),
+                            uid: firebaseUser.uid,
+                            name: firebaseUser.displayName ?? "",
+                            email: firebaseUser.email ?? "",
+                            photoURL: firebaseUser.photoURL ?? "",
+                            myPlaces: [], // Initialize as empty list
+                            myFavoritePlaces: [], // Initialize as empty list
+                          ),
+                        );
 
+                        print("New user registered.");
+                      } else {
+                        print("Existing user found: UID: ${existingUser.uid}, Name: ${existingUser.name}");
+                        print("User myPlaces: ${existingUser.myPlaces}");
+                        print("User myFavoritePlaces: ${existingUser.myFavoritePlaces}");
+                        
+                        // User exists; no need to update
+                        print("User already exists. No update needed.");
+                      }
                     }
                   } catch (e) {
                     print("Sign-in failed: $e");
                   }
                 },
+
+
+
                 width: 300.0,
                 height: 50.0,
               ),

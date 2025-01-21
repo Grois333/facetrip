@@ -14,18 +14,39 @@ class CloudFirestoreAPI{
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
 
 
-  void updateUserData(User user) async{
-    DocumentReference ref = _db.collection(USERS).doc(user.uid);
-    return await ref.set({
+  void updateUserData(User user) async {
+  // Get the current authenticated user's UID
+  auth.User? currentUser = _auth.currentUser;
+
+  if (currentUser == null) {
+    print("User is not authenticated.");
+    return; // Abort if the user is not authenticated
+  }
+
+  // Check if the current user's UID matches the UID of the user data being updated
+  if (currentUser.uid != user.uid) {
+    print("User UID does not match. Aborting update.");
+    return; // Abort if the UIDs don't match
+  }
+
+  // Proceed with updating the user data if the UIDs match
+  DocumentReference ref = _db.collection(USERS).doc(user.uid);
+  try {
+    await ref.set({
       'uid': user.uid,
       'name': user.name,
       'email': user.email,
       'photoURL': user.photoURL,
       'myPlaces': user.myPlaces,
       'myFavoritePlaces': user.myFavoritePlaces,
-      'lastSignIn': DateTime.now()
+      'registeredDate': DateTime.now(),
     }, SetOptions(merge: true));
+      print("User data updated successfully.");
+    } catch (e) {
+      print("Error updating user data: $e");
+    }
   }
+
 
   Future<void> updatePlaceData(Place place) async {
     CollectionReference refPlaces = _db.collection(PLACES);

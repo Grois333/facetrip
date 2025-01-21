@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,61 +81,109 @@ class UserBloc implements Bloc {
       if (userDoc.exists) {
         final data = userDoc.data() as Map<String, dynamic>;
 
-        // Convert `myPlaces` and `myFavoritePlaces` from Firestore to Place objects
-        List<Place> myPlaces = (data['myPlaces'] as List<dynamic>? ?? [])
-            .map((placeData) {
-              final placeMap = placeData as Map<String, dynamic>;
-              return Place(
-                key: Key(placeMap['id'] ?? ''),
-                id: placeMap['id'] ?? '',
-                name: placeMap['name'] ?? '',
-                description: placeMap['description'] ?? '',
-                urlImage: placeMap['urlImage'] ?? '',
-                likes: placeMap['likes'] ?? 0,
-                liked: placeMap['liked'] ?? false,
-                userOwner: userModel.User( 
-                  key: Key(uid), // Updated to use your custom User class
-                  uid: placeMap['userOwner']['uid'] ?? '',
-                  name: placeMap['userOwner']['name'] ?? 'Unknown',
-                  email: placeMap['userOwner']['email'] ?? 'No Email',
-                  photoURL: placeMap['userOwner']['photoURL'] ?? '',
-                  myPlaces: [],  // Empty list or fetch as needed
-                  myFavoritePlaces: [],  // Empty list or fetch as needed
-                ),
-                stars: placeMap['stars'] ?? 0,
-              );
-            })
-            .toList();
+        // Create a default placeholder User
+        final defaultUser = userModel.User(
+          key: Key(uid),
+          uid: uid,
+          name: 'Unknown User',
+          email: 'unknown@example.com',
+          photoURL: '',
+          myPlaces: [],
+          myFavoritePlaces: [],
+        );
 
-        List<Place> myFavoritePlaces = (data['myFavoritePlaces'] as List<dynamic>? ?? [])
-            .map((placeData) {
-              final placeMap = placeData as Map<String, dynamic>;
+        // Safely parse `myPlaces`
+        List<Place> myPlaces = await Future.wait(
+          (data['myPlaces'] as List<dynamic>? ?? []).map((placeData) async {
+            if (placeData is String) {
+              // Assume placeData is a Firestore path or document reference
+              DocumentSnapshot placeDoc = await FirebaseFirestore.instance.doc(placeData).get();
+              if (placeDoc.exists) {
+                final placeMap = placeDoc.data() as Map<String, dynamic>;
+                return Place(
+                  key: Key(placeMap['id'] ?? ''),
+                  id: placeMap['id'] ?? '',
+                  name: placeMap['name'] ?? '',
+                  description: placeMap['description'] ?? '',
+                  urlImage: placeMap['urlImage'] ?? '',
+                  likes: placeMap['likes'] ?? 0,
+                  liked: placeMap['liked'] ?? false,
+                  userOwner: defaultUser, // Use default User
+                  stars: placeMap['stars'] ?? 0,
+                );
+              } else {
+                throw Exception("Referenced place document does not exist: $placeData");
+              }
+            } else if (placeData is Map<String, dynamic>) {
+              final userOwnerMap = placeData['userOwner'] as Map<String, dynamic>? ?? {};
               return Place(
-                key: Key(placeMap['id'] ?? ''),
-                id: placeMap['id'] ?? '',
-                name: placeMap['name'] ?? '',
-                description: placeMap['description'] ?? '',
-                urlImage: placeMap['urlImage'] ?? '',
-                likes: placeMap['likes'] ?? 0,
-                liked: placeMap['liked'] ?? false,
-                userOwner: userModel.User( 
-                  key: Key(uid), // Updated to use your custom User class
-                  uid: placeMap['userOwner']['uid'] ?? '',
-                  name: placeMap['userOwner']['name'] ?? 'Unknown',
-                  email: placeMap['userOwner']['email'] ?? 'No Email',
-                  photoURL: placeMap['userOwner']['photoURL'] ?? '',
-                  myPlaces: [],  // Empty list or fetch as needed
-                  myFavoritePlaces: [],  // Empty list or fetch as needed
+                key: Key(placeData['id'] ?? ''),
+                id: placeData['id'] ?? '',
+                name: placeData['name'] ?? '',
+                description: placeData['description'] ?? '',
+                urlImage: placeData['urlImage'] ?? '',
+                likes: placeData['likes'] ?? 0,
+                liked: placeData['liked'] ?? false,
+                userOwner: userModel.User(
+                  key: Key(uid),
+                  uid: userOwnerMap['uid'] ?? '',
+                  name: userOwnerMap['name'] ?? 'Unknown',
+                  email: userOwnerMap['email'] ?? 'No Email',
+                  photoURL: userOwnerMap['photoURL'] ?? '',
+                  myPlaces: [],
+                  myFavoritePlaces: [],
                 ),
-                stars: placeMap['stars'] ?? 0,
+                stars: placeData['stars'] ?? 0,
               );
-            })
-            .toList();
+            } else {
+              throw FormatException("Invalid placeData format: $placeData");
+            }
+          }).toList(),
+        );
+
+        // Safely parse `myFavoritePlaces` (similar logic as `myPlaces`)
+        List<Place> myFavoritePlaces = await Future.wait(
+          (data['myFavoritePlaces'] as List<dynamic>? ?? []).map((placeData) async {
+            if (placeData is String) {
+              DocumentSnapshot placeDoc = await FirebaseFirestore.instance.doc(placeData).get();
+              if (placeDoc.exists) {
+                final placeMap = placeDoc.data() as Map<String, dynamic>;
+                return Place(
+                  key: Key(placeMap['id'] ?? ''),
+                  id: placeMap['id'] ?? '',
+                  name: placeMap['name'] ?? '',
+                  description: placeMap['description'] ?? '',
+                  urlImage: placeMap['urlImage'] ?? '',
+                  likes: placeMap['likes'] ?? 0,
+                  liked: placeMap['liked'] ?? false,
+                  userOwner: defaultUser, // Use default User
+                  stars: placeMap['stars'] ?? 0,
+                );
+              } else {
+                throw Exception("Referenced place document does not exist: $placeData");
+              }
+            } else if (placeData is Map<String, dynamic>) {
+              return Place(
+                key: Key(placeData['id'] ?? ''),
+                id: placeData['id'] ?? '',
+                name: placeData['name'] ?? '',
+                description: placeData['description'] ?? '',
+                urlImage: placeData['urlImage'] ?? '',
+                likes: placeData['likes'] ?? 0,
+                liked: placeData['liked'] ?? false,
+                userOwner: defaultUser, // Use default User
+                stars: placeData['stars'] ?? 0,
+              );
+            } else {
+              throw FormatException("Invalid placeData format: $placeData");
+            }
+          }).toList(),
+        );
 
         // Construct and return the custom User object
-        return userModel.User(  // Now using your custom User model
+        return userModel.User(
           key: Key(uid),
-          uid: data['uid'],
+          uid: data['uid'] ?? '',
           name: data['name'] ?? 'No Name',
           email: data['email'] ?? 'No Email',
           photoURL: data['photoURL'] ?? '',
@@ -150,6 +199,8 @@ class UserBloc implements Bloc {
       return null;
     }
   }
+
+
 
 
 
