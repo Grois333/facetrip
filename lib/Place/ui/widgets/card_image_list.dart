@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facetrip/Place/model/place.dart';
 import 'package:facetrip/User/model/user.dart';
 import 'package:flutter/material.dart';
@@ -86,8 +87,48 @@ class _CardImageListState extends State<CardImageList> {
 
                 // Sync the updated likes list to Firestore
                 await userBloc.likePlace(place.id, place.likes.cast<String>());
+
+                // Update the current user's `myFavoritePlaces` array in Firestore
+                try {
+                  // Fetch the user document reference
+                  final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser);
+                  final userDoc = await userRef.get();
+
+                  if (!userDoc.exists) {
+                    print("User document not found for UID: $currentUser");
+                    return;
+                  }
+
+                  // Fetch the place document reference
+                  final placeRef = FirebaseFirestore.instance.collection('places').doc(place.id);
+                  final placeDoc = await placeRef.get();
+
+                  if (!placeDoc.exists) {
+                    print("Place document not found for place ID: ${place.id}");
+                    return;
+                  }
+
+                  // Add or remove the place path in `myFavoritePlaces`
+                  if (place.liked) {
+                    // Add to `myFavoritePlaces`
+                    await userRef.update({
+                      'myFavoritePlaces': FieldValue.arrayUnion([placeRef.path])
+                    });
+                    print("Added to myFavoritePlaces: ${placeRef.path}");
+                  } else {
+                    // Remove from `myFavoritePlaces`
+                    await userRef.update({
+                      'myFavoritePlaces': FieldValue.arrayRemove([placeRef.path])
+                    });
+                    print("Removed from myFavoritePlaces: ${placeRef.path}");
+                  }
+                } catch (e) {
+                  print("Error updating myFavoritePlaces: $e");
+                }
+
               }
             },
+
           ),
         );
       }).toList(),
