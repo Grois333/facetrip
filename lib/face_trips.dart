@@ -49,7 +49,7 @@ class _FaceTrips extends State<FaceTrips> {
                 label: "",
               ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.search),
+                  icon: Icon(Icons.favorite),
                   label: "",
               ),
               BottomNavigationBarItem(

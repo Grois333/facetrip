@@ -19,7 +19,7 @@ class FaceTripsCupertino extends StatelessWidget {
               label: ""
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search, color: Colors.indigo),
+              icon: Icon(Icons.favorite, color: Colors.indigo),
               label: ""
             ),
             BottomNavigationBarItem(
