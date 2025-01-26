@@ -3,6 +3,10 @@ import 'Place/ui/screens/home_trips.dart';
 import 'Place/ui/screens/search_trips.dart';
 import '/User/ui/screens/profile_trips.dart';
 
+import 'package:facetrip/User/bloc/bloc_user.dart';
+
+final userBloc = UserBloc();
+
 class FaceTrips extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -16,7 +20,7 @@ class _FaceTrips extends State<FaceTrips> {
   int indexTap = 0;
   final List<Widget> widgetsChildren = [
     HomeTrips(),
-    SearchTrips(),
+    SearchTrips(userBloc: userBloc),
     ProfileTrips()
   ];
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facetrip/Place/model/place.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +65,24 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
 
       // Update Firestore with the new likes list
       widget.userBloc.likePlace(widget.place.id, widget.place.likes.cast<String>());
+
+      // Update the user's `myFavoritePlaces` field
+      final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+      final placeRef = FirebaseFirestore.instance.collection('places').doc(widget.place.id);
+
+      if (isLiked) {
+        // Add the place to the user's favorite places
+        await userRef.update({
+          'myFavoritePlaces': FieldValue.arrayUnion([placeRef.path]),
+        });
+      } else {
+        // Remove the place from the user's favorite places
+        await userRef.update({
+          'myFavoritePlaces': FieldValue.arrayRemove([placeRef.path]),
+        });
+      }
+
+
     }
   }
 

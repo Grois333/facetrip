@@ -6,6 +6,9 @@ import '/User/ui/screens/profile_trips.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 
+
+final userBloc = UserBloc();
+
 class FaceTripsCupertino extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class FaceTripsCupertino extends StatelessWidget {
               );
             case 1:
               return CupertinoTabView(
-                builder: (BuildContext context) => SearchTrips(),
+                builder: (BuildContext context) => SearchTrips(userBloc: userBloc),
               );
             case 2:
               return CupertinoTabView(
