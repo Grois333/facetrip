@@ -33,17 +33,41 @@ class SearchTrips extends StatefulWidget {
   _SearchTripsState createState() => _SearchTripsState();
 }
 
-class _SearchTripsState extends State<SearchTrips> {
+class _SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
   List<Place> favoritePlaces = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // Add observer for lifecycle changes
     _loadFavoritePlaces();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Avoid calling _loadFavoritePlaces unnecessarily if already loaded
+    if (!isLoading) {
+      _loadFavoritePlaces();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Remove observer
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadFavoritePlaces(); // Reload data when the app resumes
+    }
+  }
+
   Future<void> _loadFavoritePlaces() async {
+    setState(() => isLoading = true);
     try {
       final currentUser = await widget.userBloc.currentUser();
       if (currentUser != null) {
@@ -63,6 +87,11 @@ class _SearchTripsState extends State<SearchTrips> {
       setState(() => isLoading = false);
     }
   }
+
+  Future<void> reloadFavoritePlaces() async {
+    await _loadFavoritePlaces();
+  }
+
 
   Future<List<Place>> _fetchPlaces(List<String> placePaths) async {
     final List<Place> places = [];
@@ -123,6 +152,9 @@ class _SearchTripsState extends State<SearchTrips> {
         'myFavoritePlaces': FieldValue.arrayUnion([placeRef.path]),
       });
     }
+
+    // Reload data to reflect changes
+    _loadFavoritePlaces();
   }
 
   Widget _buildFavoritePlaceCard(Place place) {
@@ -202,44 +234,46 @@ class _SearchTripsState extends State<SearchTrips> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 150.0, // Height for the title and space
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: EdgeInsets.only(left: 16.0), // Add padding to left
-              title: const Text(
-                'My Favorite Places',
-                style: TextStyle(color: Colors.black),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadFavoritePlaces,
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    expandedHeight: 150.0, // Height for the title and space
+                    floating: false,
+                    pinned: true,
+                    flexibleSpace: FlexibleSpaceBar(
+                      titlePadding: EdgeInsets.only(left: 16.0), // Add padding to left
+                      title: const Text(
+                        'My Favorite Places',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      background: Container(color: Colors.white10),
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        // Check if it's the last item to add extra padding
+                        if (index == favoritePlaces.length - 1) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 80.0), // Adjust space above navigation bar
+                            child: _buildFavoritePlaceCard(favoritePlaces[index]),
+                          );
+                        }
+                        return _buildFavoritePlaceCard(favoritePlaces[index]);
+                      },
+                      childCount: favoritePlaces.length,
+                    ),
+                  ),
+                ],
               ),
-              background: Container(color: Colors.white10),
             ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                // Check if it's the last item to add extra padding
-                if (index == favoritePlaces.length - 1) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 80.0), // Adjust space above navigation bar
-                    child: _buildFavoritePlaceCard(favoritePlaces[index]),
-                  );
-                }
-                return _buildFavoritePlaceCard(favoritePlaces[index]);
-              },
-              childCount: favoritePlaces.length,
-            ),
-          ),
-        ],
-      ),
     );
   }
-
-
 }
