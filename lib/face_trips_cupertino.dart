@@ -6,10 +6,17 @@ import '/User/ui/screens/profile_trips.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 
-
 final userBloc = UserBloc();
+final GlobalKey<SearchTripsState> searchTripsKey = GlobalKey(); // ✅ Fixed
 
-class FaceTripsCupertino extends StatelessWidget {
+class FaceTripsCupertino extends StatefulWidget {
+  @override
+  _FaceTripsCupertinoState createState() => _FaceTripsCupertinoState();
+}
+
+class _FaceTripsCupertinoState extends State<FaceTripsCupertino> {
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +37,14 @@ class FaceTripsCupertino extends StatelessWidget {
               label: ""
             ),
           ],
+          onTap: (index) {
+            if (index == 1) {
+              searchTripsKey.currentState?.reloadFavoritePlaces(); // ✅ Fixed
+            }
+            setState(() {
+              _currentIndex = index;
+            });
+          },
         ),
         tabBuilder: (BuildContext context, int index) {
           switch (index) {
@@ -37,18 +52,17 @@ class FaceTripsCupertino extends StatelessWidget {
               return CupertinoTabView(
                 builder: (BuildContext context) {
                     return BlocProvider(
-                            bloc: UserBloc(),
-                            child: HomeTrips(),
+                        bloc: UserBloc(),
+                        child: HomeTrips(),
                     );
                 },
               );
             case 1:
               return CupertinoTabView(
-                builder: (BuildContext context) => SearchTrips(userBloc: userBloc),
+                builder: (BuildContext context) => SearchTrips(key: searchTripsKey, userBloc: userBloc),
               );
             case 2:
               return CupertinoTabView(
-                //builder: (BuildContext context) => ProfileTrips(),
                 builder: (BuildContext context) {
                   return BlocProvider<UserBloc>(
                     bloc: UserBloc(),
@@ -57,9 +71,8 @@ class FaceTripsCupertino extends StatelessWidget {
                 },
               );
             default:
-              // Handle any unexpected index values (although unlikely in your case)
               return CupertinoTabView(
-                builder: (BuildContext context) => HomeTrips(), // Or any default screen
+                builder: (BuildContext context) => HomeTrips(),
               );
           }
         },

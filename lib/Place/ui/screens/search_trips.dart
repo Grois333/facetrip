@@ -27,13 +27,15 @@ class FloatingActionButtonGreen extends StatelessWidget {
 class SearchTrips extends StatefulWidget {
   final UserBloc userBloc;
 
-  SearchTrips({required this.userBloc});
+  //SearchTrips({required this.userBloc});
+  SearchTrips({Key? key, required this.userBloc}) : super(key: key);
 
   @override
-  _SearchTripsState createState() => _SearchTripsState();
+  //_SearchTripsState createState() => _SearchTripsState();
+  SearchTripsState createState() => SearchTripsState();
 }
 
-class _SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
+class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
   List<Place> favoritePlaces = [];
   bool isLoading = true;
 
