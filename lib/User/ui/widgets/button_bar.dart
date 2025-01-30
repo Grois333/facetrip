@@ -25,7 +25,7 @@ class ButtonsBar extends StatelessWidget {
             //Cambiar la contraseña
             CircleButton(
               false, 
-              Icons.vpn_key, 
+              Icons.description, 
               20.0,
               Color.fromRGBO(255, 255, 255, 0.6)
                 , () => {

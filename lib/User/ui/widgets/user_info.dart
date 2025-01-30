@@ -58,6 +58,16 @@ class UserInfo extends StatelessWidget {
                 fontFamily: 'Lato'
             )
         ),
+        SizedBox(height: 5.0), // Adds spacing before the editable text
+        Text(
+          "There is an amazing place in Sri Lanka",
+          style: TextStyle(
+            fontSize: 13.0,
+            fontWeight: FontWeight.normal,
+            color: Colors.white, // White text like the username
+            fontFamily: 'Lato',
+          ),
+        )
       ],
     );
 
