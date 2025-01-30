@@ -13,7 +13,12 @@ class CloudFirestoreRepository {
   void updateUserDataFirestore(User user) => _cloudFirestoreAPI.updateUserData(user);
   Future<void> updatePlaceData(Place place) => _cloudFirestoreAPI.updatePlaceData(place);
 
-  List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreAPI.buildMyPlaces(placesListSnapshot);
+  //List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreAPI.buildMyPlaces(placesListSnapshot);
+  List<ProfilePlace> buildMyPlaces(
+      List<DocumentSnapshot> placesListSnapshot, Function(String) onDelete) {
+    return _cloudFirestoreAPI.buildMyPlaces(placesListSnapshot, onDelete);
+  }
+
   List<CardImageWithFabIcon> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreAPI.buildPlaces(placesListSnapshot);
 
 }

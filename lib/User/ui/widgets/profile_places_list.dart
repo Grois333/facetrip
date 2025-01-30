@@ -69,7 +69,13 @@ class ProfilePlacesList extends StatelessWidget {
               if (snapshot.hasData && snapshot.data.docs.isNotEmpty) {
                 // Use `docs` instead of `documents` and pass it to `buildPlaces`
                 return Column(
-                  children: userBloc.buildMyPlaces(snapshot.data.docs),
+                  //children: userBloc.buildMyPlaces(snapshot.data.docs),
+                  children: userBloc.buildMyPlaces(
+                    snapshot.data.docs, // The placesListSnapshot
+                    (placeId) {
+                      userBloc.removePlaceFromUI(placeId); // Example of onDelete function logic
+                    },
+                  ),
                 );
               } else {
                 return const Center(

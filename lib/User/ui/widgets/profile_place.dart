@@ -7,8 +7,9 @@ import 'package:facetrip/User/ui/widgets/profile_place_info.dart';
 
 class ProfilePlace extends StatelessWidget {
   final Place place;
+  final Function(String) onDelete; // Add onDelete callback
 
-  ProfilePlace(this.place);
+  ProfilePlace({required this.place, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,11 @@ class ProfilePlace extends StatelessWidget {
       alignment: Alignment(0.0, 0.8),
       children: <Widget>[
         photoCard,
-        ProfilePlaceInfo(place: place, userBloc: userBloc), // Pass both place and userBloc
+        ProfilePlaceInfo(
+          place: place,
+          userBloc: userBloc,
+          onDelete: onDelete, // Pass the callback to ProfilePlaceInfo
+        ),
       ],
     );
   }

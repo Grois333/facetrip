@@ -82,14 +82,17 @@ class CloudFirestoreAPI{
 
 
   // Build a list of ProfilePlace widgets from Firestore snapshots
-  List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) {
+  List<ProfilePlace> buildMyPlaces(
+    List<DocumentSnapshot> placesListSnapshot, Function(String) onDelete) {
     List<ProfilePlace> profilePlaces = [];
+
     placesListSnapshot.forEach((p) {
       Map<String, dynamic>? data = p.data() as Map<String, dynamic>?;
+
       if (data != null) {
         profilePlaces.add(
           ProfilePlace(
-            Place(
+            place: Place(
               key: UniqueKey(),
               id: p.id, // Use Firestore document ID as the ID
               name: data['name'] ?? 'Unnamed Place',
@@ -108,6 +111,7 @@ class CloudFirestoreAPI{
                 myFavoritePlaces: [],
               ),
             ),
+            onDelete: onDelete, // Pass the onDelete callback
           ),
         );
       }
@@ -115,6 +119,7 @@ class CloudFirestoreAPI{
 
     return profilePlaces;
   }
+
 
   List<CardImageWithFabIcon> buildPlaces(List<DocumentSnapshot> placesListSnapshot) {
     List<CardImageWithFabIcon> placesCard = [];

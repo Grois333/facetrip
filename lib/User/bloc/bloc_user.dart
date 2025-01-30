@@ -7,14 +7,17 @@ import 'package:facetrip/Place/repository/firebase_storage_repository.dart';
 import 'package:facetrip/Place/ui/widgets/card_image.dart';
 import 'package:facetrip/User/repository/cloud_firestore_api.dart';
 import 'package:facetrip/User/ui/widgets/profile_place.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/model/user.dart' as userModel;
 import 'package:facetrip/User/repository/auth_repository.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:facetrip/User/repository/cloud_firestore_repository.dart';
 import '../../Place/model/place.dart';
+
 
 
 
@@ -217,7 +220,7 @@ class UserBloc implements Bloc {
   //List<ProfilePlace> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreRepository.buildPlaces(placesListSnapshot);
 
 
-  List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot) {
+  List<ProfilePlace> buildMyPlaces(List<DocumentSnapshot> placesListSnapshot, Function(String) onDelete) {
     return placesListSnapshot.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
 
@@ -226,7 +229,7 @@ class UserBloc implements Bloc {
       userModel.User currentUserModel = mapFirebaseUserToUserModel(firebaseUser!);
 
       return ProfilePlace(
-        Place(
+        place: Place(
           key: Key(doc.id), // Use doc.id as key
           id: doc.id,
           name: data['name'],
@@ -236,9 +239,11 @@ class UserBloc implements Bloc {
           stars: data['stars'] ?? 0,
           userOwner: currentUserModel, // Pass the mapped custom UserModel
         ),
+        onDelete: onDelete, // Pass the onDelete function
       );
     }).toList();
   }
+
 
   List<CardImageWithFabIcon> buildPlaces(List<DocumentSnapshot> placesListSnapshot) => _cloudFirestoreRepository.buildPlaces(placesListSnapshot);
 
@@ -295,9 +300,91 @@ class UserBloc implements Bloc {
   StreamSink<Place> get placeSelectedSink => _placeSelectedStreamController.sink;
   
   void signOut() async {
-  await _auth_repository.signOut();
-  // Do not emit anything to the stream
+    await _auth_repository.signOut();
+    // Do not emit anything to the stream
+  }
+
+  Future<void> removePlaceFromUI(String placeId) async {
+  try {
+    // Get the current user
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user logged in.");
+      return;
+    }
+
+    // Reference to the user's document
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+    // Reference to the place
+    DocumentReference placeRef =
+        FirebaseFirestore.instance.collection('places').doc(placeId);
+
+    // Fetch the current user's document to debug existing favorites and places
+    DocumentSnapshot userSnapshot = await userRef.get();
+
+    if (!userSnapshot.exists) {
+      print("User document does not exist!");
+      return;
+    }
+
+    // Fetch the lists of places
+    List<dynamic> currentFavorites = userSnapshot['myFavoritePlaces'] ?? [];
+    List<dynamic> currentMyPlaces = userSnapshot['myPlaces'] ?? [];
+
+    // Debug: Check if the place is in the favorites and myPlaces before removing
+    print("Before removal:");
+    print("  myFavoritePlaces: $currentFavorites");
+    print("  myPlaces: $currentMyPlaces");
+
+    // Flag to check if removal occurred in either list
+    bool placeRemovedFromFavorites = false;
+    bool placeRemovedFromMyPlaces = false;
+
+    // Ensure the placeId is correctly formatted for Firestore (path of the document)
+    String placePath = placeRef.path;
+
+    // Remove from myFavoritePlaces if present
+    if (currentFavorites.contains(placePath)) {
+      await userRef.update({
+        'myFavoritePlaces': FieldValue.arrayRemove([placePath]),
+      });
+      placeRemovedFromFavorites = true;
+      print("Removing from myFavoritePlaces...");
+    }
+
+    // Remove from myPlaces if present
+    if (currentMyPlaces.contains(placePath)) {
+      await userRef.update({
+        'myPlaces': FieldValue.arrayRemove([placePath]),
+      });
+      placeRemovedFromMyPlaces = true;
+      print("Removing from myPlaces...");
+    }
+
+    // Fetch the updated user data after the removal attempt
+    DocumentSnapshot updatedSnapshot = await userRef.get();
+    print("After removal:");
+    print("  myFavoritePlaces: ${updatedSnapshot['myFavoritePlaces']}");
+    print("  myPlaces: ${updatedSnapshot['myPlaces']}");
+
+    // Check and log removal status
+    if (placeRemovedFromFavorites || placeRemovedFromMyPlaces) {
+      print("✅ Place removed successfully from both fields.");
+    } else {
+      print("⚠️ Place not found in either list.");
+    }
+  } catch (e) {
+    print("❌ Error removing place: $e");
+  }
 }
+
+
+
+
+
+
 
   @override
   void dispose() {
