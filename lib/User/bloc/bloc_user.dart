@@ -305,80 +305,74 @@ class UserBloc implements Bloc {
   }
 
   Future<void> removePlaceFromUI(String placeId) async {
-  try {
-    // Get the current user
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print("No user logged in.");
-      return;
+    try {
+      // Get the current user
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("No user logged in.");
+        return;
+      }
+
+      // Reference to the users collection
+      CollectionReference usersRef = FirebaseFirestore.instance.collection('users');
+
+      // Reference to the place
+      String placePath = 'places/$placeId';
+
+      // Fetch all users to check who has this place in their lists
+      QuerySnapshot usersSnapshot = await usersRef.get();
+
+      for (QueryDocumentSnapshot userDoc in usersSnapshot.docs) {
+        // Get user reference
+        DocumentReference userRef = usersRef.doc(userDoc.id);
+
+        // Get user's current fields
+        List<dynamic> currentFavorites = userDoc['myFavoritePlaces'] ?? [];
+        List<dynamic> currentMyPlaces = userDoc['myPlaces'] ?? [];
+
+        bool foundInFavorites = currentFavorites.contains(placePath);
+        bool foundInMyPlaces = currentMyPlaces.contains(placePath);
+
+        // Debug: Print before removal
+        print("Before removal for user ${userDoc.id}:");
+        print("  myFavoritePlaces: $currentFavorites");
+        print("  myPlaces: $currentMyPlaces");
+
+        // Remove the place if it exists in either list
+        if (foundInFavorites || foundInMyPlaces) {
+          Map<String, dynamic> updates = {};
+
+          if (foundInFavorites) {
+            print("Removing from myFavoritePlaces for user ${userDoc.id}...");
+            updates['myFavoritePlaces'] = FieldValue.arrayRemove([placePath]);
+          }
+
+          if (foundInMyPlaces) {
+            print("Removing from myPlaces for user ${userDoc.id}...");
+            updates['myPlaces'] = FieldValue.arrayRemove([placePath]);
+          }
+
+          // Perform the update only if there's something to remove
+          if (updates.isNotEmpty) {
+            await userRef.update(updates);
+          }
+
+          // Debug: Fetch updated user data after removal
+          DocumentSnapshot updatedSnapshot = await userRef.get();
+          print("After removal for user ${userDoc.id}:");
+          print("  myFavoritePlaces: ${updatedSnapshot['myFavoritePlaces']}");
+          print("  myPlaces: ${updatedSnapshot['myPlaces']}");
+        } else {
+          print("! Place not found for user ${userDoc.id}, skipping...");
+        }
+      }
+
+      print("✅ Place removed successfully from all users.");
+    } catch (e) {
+      print("❌ Error removing place: $e");
     }
-
-    // Reference to the user's document
-    DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(user.uid);
-
-    // Reference to the place
-    DocumentReference placeRef =
-        FirebaseFirestore.instance.collection('places').doc(placeId);
-
-    // Fetch the current user's document to debug existing favorites and places
-    DocumentSnapshot userSnapshot = await userRef.get();
-
-    if (!userSnapshot.exists) {
-      print("User document does not exist!");
-      return;
-    }
-
-    // Fetch the lists of places
-    List<dynamic> currentFavorites = userSnapshot['myFavoritePlaces'] ?? [];
-    List<dynamic> currentMyPlaces = userSnapshot['myPlaces'] ?? [];
-
-    // Debug: Check if the place is in the favorites and myPlaces before removing
-    print("Before removal:");
-    print("  myFavoritePlaces: $currentFavorites");
-    print("  myPlaces: $currentMyPlaces");
-
-    // Flag to check if removal occurred in either list
-    bool placeRemovedFromFavorites = false;
-    bool placeRemovedFromMyPlaces = false;
-
-    // Ensure the placeId is correctly formatted for Firestore (path of the document)
-    String placePath = placeRef.path;
-
-    // Remove from myFavoritePlaces if present
-    if (currentFavorites.contains(placePath)) {
-      await userRef.update({
-        'myFavoritePlaces': FieldValue.arrayRemove([placePath]),
-      });
-      placeRemovedFromFavorites = true;
-      print("Removing from myFavoritePlaces...");
-    }
-
-    // Remove from myPlaces if present
-    if (currentMyPlaces.contains(placePath)) {
-      await userRef.update({
-        'myPlaces': FieldValue.arrayRemove([placePath]),
-      });
-      placeRemovedFromMyPlaces = true;
-      print("Removing from myPlaces...");
-    }
-
-    // Fetch the updated user data after the removal attempt
-    DocumentSnapshot updatedSnapshot = await userRef.get();
-    print("After removal:");
-    print("  myFavoritePlaces: ${updatedSnapshot['myFavoritePlaces']}");
-    print("  myPlaces: ${updatedSnapshot['myPlaces']}");
-
-    // Check and log removal status
-    if (placeRemovedFromFavorites || placeRemovedFromMyPlaces) {
-      print("✅ Place removed successfully from both fields.");
-    } else {
-      print("⚠️ Place not found in either list.");
-    }
-  } catch (e) {
-    print("❌ Error removing place: $e");
   }
-}
+
 
 
 
