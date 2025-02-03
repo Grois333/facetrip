@@ -58,7 +58,8 @@ class ProfileTrips extends StatelessWidget {
         ProfileBackground(),
         ListView(
           children: <Widget>[
-            ProfileHeader(user), // Removed user parameter
+            //ProfileHeader(user), // Removed user parameter
+            ProfileHeader(),
             ProfilePlacesList(user), // Adjust as needed
           ],
         ),
