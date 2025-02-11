@@ -14,15 +14,18 @@ class ProfileHeader extends StatelessWidget {
       margin: const EdgeInsets.only(left: 10.0, right: 10.0, top: 50.0),
       child: Column(
         children: <Widget>[
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
-            child: Text(
-              'Profile',
-              style: TextStyle(
-                fontFamily: 'Lato',
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 30.0,
+          const Align(
+            alignment: Alignment.centerLeft, // Aligns the text to the left
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 10.0),
+              child: Text(
+                'Profile',
+                style: TextStyle(
+                  fontFamily: 'Lato',
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30.0,
+                ),
               ),
             ),
           ),
@@ -30,6 +33,7 @@ class ProfileHeader extends StatelessWidget {
           ButtonsBar(
             toggleEditMode: () {},
             isEditing: false,
+            user: user,
           ),
         ],
       ),
