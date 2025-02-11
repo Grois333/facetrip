@@ -375,6 +375,42 @@ class UserBloc implements Bloc {
 
 
 
+  // Add stream for user description updates
+  final _descriptionController = StreamController<String>.broadcast();
+  Stream<String> get descriptionStream => _descriptionController.stream;
+
+  Future<void> updateUserDescription(String uid, String newDescription) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'description': newDescription,
+      });
+      // Emit the new description to stream
+      _descriptionController.add(newDescription);
+    } catch (e) {
+      print("Error updating description: $e");
+      rethrow;
+    }
+  }
+
+  Future<String> getUserDescription(String uid) async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      
+      if (doc.exists) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return data['description'] ?? '';
+      }
+      return '';
+    } catch (e) {
+      print("Error fetching description: $e");
+      return '';
+    }
+  }
+
+
 
 
 

@@ -8,6 +8,7 @@ class User {
   final String photoURL;
   final List<Place> myPlaces;
   final List<Place> myFavoritePlaces;
+  String description; // Added description field
 
   //myFavoritePlaces
   //myPlaces
@@ -19,7 +20,8 @@ class User {
     required this.email,
     required this.photoURL,
     required this.myPlaces,
-    required this.myFavoritePlaces
+    required this.myFavoritePlaces,
+    this.description = "There is an amazing place in Sri Lanka", // Default value
   });
 
 }

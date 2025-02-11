@@ -13,54 +13,36 @@ class ProfileTrips extends StatelessWidget {
   Widget build(BuildContext context) {
     userBloc = BlocProvider.of<UserBloc>(context);
 
-    return StreamBuilder(
-      stream: userBloc.authStatus,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-          case ConnectionState.none:
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-
-          case ConnectionState.active:
-            return showProfileData(snapshot);
-          case ConnectionState.done:
-            if (snapshot.hasData && !snapshot.hasError) {
-              return showProfileData(snapshot);
-            } else {
-              return showNotLoggedIn();
-            }
-
-          default:
-            return const Center(
-              child: Text("Something went wrong."),
-            );
-        }
-      },
-    );
-  }
-
-  Widget showProfileData(AsyncSnapshot snapshot) {
-    // Create a `User` object with required parameters
-    var user = User(
-      key: UniqueKey(),
-      uid: snapshot.data.uid ?? "No UID",
-      name: snapshot.data.displayName ?? "No Name",
-      email: snapshot.data.email ?? "No Email",
-      photoURL: snapshot.data.photoURL ?? "No Photo",
-      myPlaces: [],
-      myFavoritePlaces: [],
-    );
-
     return Stack(
       children: <Widget>[
         ProfileBackground(),
         ListView(
           children: <Widget>[
-            //ProfileHeader(user), // Removed user parameter
-            ProfileHeader(),
-            ProfilePlacesList(user), // Adjust as needed
+            StreamBuilder(
+              stream: userBloc.userInfoStream, // Use userInfoStream instead of authStatus
+              builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                  case ConnectionState.none:
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    if (snapshot.hasData && !snapshot.hasError) {
+                      return Column(
+                        children: [
+                          ProfileHeader(user: snapshot.data!),
+                          ProfilePlacesList(snapshot.data!),
+                        ],
+                      );
+                    } else {
+                      return showNotLoggedIn();
+                    }
+                }
+              },
+            ),
           ],
         ),
       ],
@@ -68,20 +50,15 @@ class ProfileTrips extends StatelessWidget {
   }
 
   Widget showNotLoggedIn() {
-    return Stack(
-      children: <Widget>[
-        ProfileBackground(),
-        ListView(
-          children: <Widget>[
-            const Center(
-              child: Text(
-                "Usuario no logeado. Haz Login",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+    return const Center(
+      child: Text(
+        "Usuario no logeado. Haz Login",
+        style: TextStyle(
+          fontSize: 18, 
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
-      ],
+      ),
     );
   }
 }

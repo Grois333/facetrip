@@ -1,20 +1,39 @@
-import 'package:facetrip/User/model/user.dart';
 import 'package:flutter/material.dart';
+import 'package:facetrip/User/model/user.dart';
+import 'package:facetrip/User/ui/widgets/description_field.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:facetrip/User/bloc/bloc_user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserInfo extends StatelessWidget {
+class UserInfo extends StatefulWidget {
   final User user;
-  final bool editMode;
-  final TextEditingController descriptionController;
 
-  UserInfo({
+  const UserInfo({
     Key? key,
     required this.user,
-    required this.editMode,
-    required this.descriptionController,
   }) : super(key: key);
 
   @override
+  State<UserInfo> createState() => _UserInfoState();
+}
+
+class _UserInfoState extends State<UserInfo> {
+  late Stream<DocumentSnapshot> userStream;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the stream to listen to user document updates
+    userStream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.user.uid)
+        .snapshots();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final userBloc = BlocProvider.of<UserBloc>(context);
+    
     final userPhoto = Container(
       width: 90.0,
       height: 90.0,
@@ -28,80 +47,74 @@ class UserInfo extends StatelessWidget {
         shape: BoxShape.circle,
         image: DecorationImage(
           fit: BoxFit.cover,
-          image: NetworkImage(user.photoURL),
+          image: NetworkImage(widget.user.photoURL),
         ),
       ),
-    );
-
-    final userInfo = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // Name (non-editable)
-        Container(
-          margin: const EdgeInsets.only(bottom: 5.0),
-          child: Text(
-            user.name,
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'Lato',
-            ),
-          ),
-        ),
-        // Email (non-editable)
-        Text(
-          user.email,
-          style: const TextStyle(
-            fontSize: 15.0,
-            color: Colors.white30,
-            fontFamily: 'Lato',
-          ),
-        ),
-        const SizedBox(height: 5.0), // Spacing before the description
-
-        // Description: Editable only in edit mode, but always visible
-        editMode
-            ? _buildEditableTextField(descriptionController, "Description")
-            : Text(
-                descriptionController.text.isNotEmpty
-                    ? descriptionController.text
-                    : "There is an amazing place in Sri Lanka", // Default text
-                style: const TextStyle(
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.white,
-                  fontFamily: 'Lato',
-                ),
-              ),
-      ],
     );
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 20.0),
       child: Row(
-        children: <Widget>[userPhoto, userInfo],
-      ),
-    );
-  }
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          userPhoto,
+          Expanded(
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: userStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text(
+                    'Error loading user data',
+                    style: TextStyle(color: Colors.red[400]),
+                  );
+                }
 
-  /// Editable text field for the description
-  Widget _buildEditableTextField(TextEditingController controller, String label) {
-    return SizedBox(
-      width: 200,
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.white30),
-          enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.white30),
+                // Get the current description from Firestore
+                String currentDescription = '';
+                if (snapshot.hasData && snapshot.data != null) {
+                  Map<String, dynamic>? userData = 
+                      snapshot.data!.data() as Map<String, dynamic>?;
+                  currentDescription = userData?['description'] ?? '';
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 5.0),
+                      child: Text(
+                        widget.user.name,
+                        style: const TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Lato',
+                        ),
+                      ),
+                    ),
+                    Text(
+                      widget.user.email,
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                        color: Colors.white30,
+                        fontFamily: 'Lato',
+                      ),
+                    ),
+                    const SizedBox(height: 5.0),
+                    DescriptionField(
+                      uid: widget.user.uid,
+                      initialText: currentDescription, // Use the current description from Firestore
+                      isEditing: false,
+                      onSave: (newDescription) async {
+                        await userBloc.updateUserDescription(widget.user.uid, newDescription);
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
-          ),
-        ),
+        ],
       ),
     );
   }
