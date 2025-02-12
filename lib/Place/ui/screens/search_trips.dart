@@ -42,7 +42,8 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // Add observer for lifecycle changes
+    WidgetsBinding.instance
+        .addObserver(this); // Add observer for lifecycle changes
     _loadFavoritePlaces();
   }
 
@@ -79,7 +80,8 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
             .get();
 
         if (userDoc.exists) {
-          final myFavoritePlaces = List<String>.from(userDoc['myFavoritePlaces'] ?? []);
+          final myFavoritePlaces =
+              List<String>.from(userDoc['myFavoritePlaces'] ?? []);
           favoritePlaces = await _fetchPlaces(myFavoritePlaces);
         }
       }
@@ -93,7 +95,6 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
   Future<void> reloadFavoritePlaces() async {
     await _loadFavoritePlaces();
   }
-
 
   Future<List<Place>> _fetchPlaces(List<String> placePaths) async {
     final List<Place> places = [];
@@ -131,8 +132,10 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
     if (currentUser == null) return;
 
     final likesList = place.likes.cast<String>();
-    final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
-    final placeRef = FirebaseFirestore.instance.collection('places').doc(place.id);
+    final userRef =
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+    final placeRef =
+        FirebaseFirestore.instance.collection('places').doc(place.id);
 
     setState(() {
       if (isLiked) {
@@ -173,18 +176,22 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
           margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
           elevation: 4.0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(15.0)), // Rounded on all sides
+            borderRadius:
+                BorderRadius.all(Radius.circular(15.0)), // Rounded on all sides
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(15.0)), // Rounded on all sides
+                borderRadius: BorderRadius.all(
+                    Radius.circular(15.0)), // Rounded on all sides
                 child: Image.network(
                   place.urlImage,
                   width: double.infinity,
-                  height: 250.0, // Set a fixed height to ensure full image visibility
-                  fit: BoxFit.cover, // Ensure the full image is visible while maintaining aspect ratio
+                  height:
+                      250.0, // Set a fixed height to ensure full image visibility
+                  fit: BoxFit
+                      .cover, // Ensure the full image is visible while maintaining aspect ratio
                 ),
               ),
               Padding(
@@ -202,7 +209,8 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
                     const SizedBox(height: 5.0),
                     Text(
                       place.description,
-                      style: const TextStyle(fontSize: 14.0, color: Colors.grey),
+                      style:
+                          const TextStyle(fontSize: 14.0, color: Colors.grey),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -215,13 +223,16 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
                             5,
                             (index) => Icon(
                               Icons.star,
-                              color: index < place.stars ? Colors.amber : Colors.grey,
+                              color: index < place.stars
+                                  ? Colors.amber
+                                  : Colors.grey,
                               size: 18.0,
                             ),
                           ),
                         ),
                         FloatingActionButtonGreen(
-                          iconData: isLiked ? Icons.favorite : Icons.favorite_border,
+                          iconData:
+                              isLiked ? Icons.favorite : Icons.favorite_border,
                           onPressed: () => _toggleLike(place, isLiked),
                         ),
                       ],
@@ -250,7 +261,8 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
                     floating: false,
                     pinned: true,
                     flexibleSpace: FlexibleSpaceBar(
-                      titlePadding: EdgeInsets.only(left: 16.0), // Add padding to left
+                      titlePadding:
+                          EdgeInsets.only(left: 16.0), // Add padding to left
                       title: const Text(
                         'My Favorite Places',
                         style: TextStyle(color: Colors.black),
@@ -258,21 +270,39 @@ class SearchTripsState extends State<SearchTrips> with WidgetsBindingObserver {
                       background: Container(color: Colors.white10),
                     ),
                   ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        // Check if it's the last item to add extra padding
-                        if (index == favoritePlaces.length - 1) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 80.0), // Adjust space above navigation bar
-                            child: _buildFavoritePlaceCard(favoritePlaces[index]),
-                          );
-                        }
-                        return _buildFavoritePlaceCard(favoritePlaces[index]);
-                      },
-                      childCount: favoritePlaces.length,
+                  // Check if favoritePlaces is empty
+                  if (favoritePlaces.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'No Favorites Found',
+                            style:
+                                TextStyle(fontSize: 18.0, color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          // Check if it's the last item to add extra padding
+                          if (index == favoritePlaces.length - 1) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                  bottom:
+                                      80.0), // Adjust space above navigation bar
+                              child: _buildFavoritePlaceCard(
+                                  favoritePlaces[index]),
+                            );
+                          }
+                          return _buildFavoritePlaceCard(favoritePlaces[index]);
+                        },
+                        childCount: favoritePlaces.length,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

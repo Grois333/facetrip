@@ -53,10 +53,13 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
         isLiked = !isLiked;
       });
 
-      widget.userBloc.likePlace(widget.place.id, widget.place.likes.cast<String>());
+      widget.userBloc
+          .likePlace(widget.place.id, widget.place.likes.cast<String>());
 
-      final userRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
-      final placeRef = FirebaseFirestore.instance.collection('places').doc(widget.place.id);
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+      final placeRef =
+          FirebaseFirestore.instance.collection('places').doc(widget.place.id);
 
       if (isLiked) {
         await userRef.update({
@@ -72,7 +75,10 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
 
   Future<void> _deletePlace() async {
     try {
-      await FirebaseFirestore.instance.collection('places').doc(widget.place.id).delete();
+      await FirebaseFirestore.instance
+          .collection('places')
+          .doc(widget.place.id)
+          .delete();
       widget.onDelete(widget.place.id); // Notify parent widget to update UI
     } catch (e) {
       print("Error deleting place: $e");
@@ -143,6 +149,9 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
                             fontSize: 12.0,
                             fontWeight: FontWeight.bold,
                           ),
+                          maxLines: 2, // Limit to 2 lines
+                          overflow: TextOverflow
+                              .ellipsis, // Show ellipsis if text overflows
                         ),
                       ],
                     ),
@@ -150,7 +159,9 @@ class _ProfilePlaceInfoState extends State<ProfilePlaceInfo> {
                   Row(
                     children: List.generate(5, (index) {
                       return Icon(
-                        index < (widget.place.stars ?? 0) ? Icons.star : Icons.star_border,
+                        index < (widget.place.stars ?? 0)
+                            ? Icons.star
+                            : Icons.star_border,
                         color: Colors.amber,
                         size: 20.0,
                       );

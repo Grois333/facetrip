@@ -60,7 +60,9 @@ class DescriptionPlace extends StatelessWidget {
           child: Text(
             namePlace,
             style: const TextStyle(
-                fontFamily: "Lato", fontSize: 30.0, fontWeight: FontWeight.w900),
+                fontFamily: "Lato",
+                fontSize: 30.0,
+                fontWeight: FontWeight.w900),
             textAlign: TextAlign.left,
           ),
         ),
@@ -85,7 +87,10 @@ class DescriptionPlace extends StatelessWidget {
       children: <Widget>[
         titleStars, // Title and stars
         description, // Description
-        ButtonPurple(buttonText: "Navigate", onPressed: () {}),
+        Container(
+          height: 55, // Set your desired height here
+          child: ButtonPurple(buttonText: "User ", onPressed: () {}),
+        ),
       ],
     );
   }
