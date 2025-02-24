@@ -17,7 +17,7 @@ class DescriptionPlace extends StatelessWidget {
         // Full star
         starWidgets.add(
           Container(
-            margin: const EdgeInsets.only(top: 323.0, right: 3.0),
+            margin: const EdgeInsets.only(top: 0, right: 3.0),
             child: const Icon(
               Icons.star,
               color: Color(0xFFf2C611),
@@ -28,7 +28,7 @@ class DescriptionPlace extends StatelessWidget {
         // Half star
         starWidgets.add(
           Container(
-            margin: const EdgeInsets.only(top: 323.0, right: 3.0),
+            margin: const EdgeInsets.only(top: 0, right: 3.0),
             child: const Icon(
               Icons.star_half,
               color: Color(0xFFf2C611),
@@ -39,7 +39,7 @@ class DescriptionPlace extends StatelessWidget {
         // Empty star
         starWidgets.add(
           Container(
-            margin: const EdgeInsets.only(top: 323.0, right: 3.0),
+            margin: const EdgeInsets.only(top: 0, right: 3.0),
             child: const Icon(
               Icons.star_border,
               color: Color(0xFFf2C611),
@@ -53,21 +53,27 @@ class DescriptionPlace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleStars = Row(
-      children: <Widget>[
-        Container(
-          margin: const EdgeInsets.only(top: 320.0, left: 20.0, right: 20.0),
-          child: Text(
+    final titleStars = Container(
+      margin: const EdgeInsets.only(top: 320.0, left: 20.0, right: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,  // This prevents extra spacing
+        children: <Widget>[
+          Text(
             namePlace,
             style: const TextStyle(
-                fontFamily: "Lato",
-                fontSize: 30.0,
-                fontWeight: FontWeight.w900),
+              fontFamily: "Lato",
+              fontSize: 30.0,
+              fontWeight: FontWeight.w900
+            ),
             textAlign: TextAlign.left,
           ),
-        ),
-        Row(children: buildStars()), // Dynamically created stars
-      ],
+          //const SizedBox(height: 5.0),  // Add small controlled spacing
+          Row(
+            children: buildStars(),
+          ),
+        ],
+      ),
     );
 
     final description = Container(
