@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: 'FaceTrip',
           //home: FaceTripsCupertino(),
+          debugShowCheckedModeBanner: false,
           home: SignInScreen(),
         ),
         bloc: UserBloc());
