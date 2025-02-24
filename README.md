@@ -49,11 +49,11 @@ FaceTrip is a Flutter-based travel journal app that allows users to log in with 
    cd facetrip
 
 2. Install dependencies:
-   ``sh
+   ```sh
    flutter pub get
 
 3. Run the app:
-   ``sh
+   ```sh
    flutter run
 
 
