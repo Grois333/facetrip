@@ -19,7 +19,7 @@ class _FloatingActionButtonGreen extends State<FloatingActionButtonGreen> {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      backgroundColor: const Color(0xFF11DA53),
+      backgroundColor: const Color.fromARGB(255, 100, 197, 85),
       mini: true,
       tooltip: "Fav",
       onPressed: widget.onPressed, // Call the provided callback
