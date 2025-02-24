@@ -7,7 +7,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:facetrip/User/bloc/bloc_user.dart';
 
 final userBloc = UserBloc();
-final GlobalKey<SearchTripsState> searchTripsKey = GlobalKey(); // ✅ Fixed
+final GlobalKey<SearchTripsState> searchTripsKey = GlobalKey();
 
 class FaceTripsCupertino extends StatefulWidget {
   @override
@@ -25,21 +25,30 @@ class _FaceTripsCupertinoState extends State<FaceTripsCupertino> {
           backgroundColor: Color(0x33FFFFFF),
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.indigo),
+              icon: Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Icon(Icons.home, color: Colors.indigo),
+              ),
               label: ""
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite, color: Colors.indigo),
+              icon: Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Icon(Icons.favorite, color: Colors.indigo),
+              ),
               label: ""
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person, color: Colors.indigo),
+              icon: Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Icon(Icons.person, color: Colors.indigo),
+              ),
               label: ""
             ),
           ],
           onTap: (index) {
             if (index == 1) {
-              searchTripsKey.currentState?.reloadFavoritePlaces(); // ✅ Fixed
+              searchTripsKey.currentState?.reloadFavoritePlaces();
             }
             setState(() {
               _currentIndex = index;
