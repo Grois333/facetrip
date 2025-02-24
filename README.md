@@ -1,6 +1,6 @@
 # FaceTrip 🌍✈️
 
-![FaceTrip Icon]()
+![FaceTrip Icon](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/playstore.png)
 
 FaceTrip is a Flutter-based travel journal app that allows users to log in with their Google account, add and share their travel experiences, and save favorite trips. The app uses Firebase Firestore for data storage and Firebase Storage for image uploads.
 
@@ -30,6 +30,12 @@ FaceTrip is a Flutter-based travel journal app that allows users to log in with 
 
 ![Home Screen]()
 
+![Dashboard]()
+
+![Add Trip]()
+
+![Favorites]()
+
 ---
 
 ## 🛠️ Tech Stack
@@ -55,7 +61,6 @@ FaceTrip is a Flutter-based travel journal app that allows users to log in with 
 3. Run the app:
    ```sh
    flutter run
-
 
 
 ## Getting Started
