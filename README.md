@@ -17,7 +17,7 @@ FaceTrip is a Flutter-based travel journal app that allows users to log in with 
   - Description
   - Images
   - 5-Star Rating System ⭐⭐⭐⭐⭐
-- 🗑️ **Delete Trips**: Remove trips from your dashboard.
+- 🗑️ **Delete Trips**: Remove trips from your dashboard by swiping the trip.
 - 🌎 **Explore All Trips**: View all shared trips and user details.
 - ❤️ **Favorites**: Save trips to your favorites by tapping the heart icon.
 - 🔥 **Firebase Backend**:
@@ -28,13 +28,17 @@ FaceTrip is a Flutter-based travel journal app that allows users to log in with 
 
 ## 📸 Screenshots
 
-![Home Screen]()
+![Home Screen](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/app-screenshots/home-screen.jpg)
 
-![Dashboard]()
+![Home Screen](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/app-screenshots/home.jpg)
 
-![Add Trip]()
+![Dashboard](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/app-screenshots/dashboard.jpg)
 
-![Favorites]()
+![Edit Description](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/app-screenshots/edit.jpg)
+
+![Add Trip](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/app-screenshots/add-place.jpg)
+
+![Favorites](https://raw.githubusercontent.com/Grois333/facetrip/refs/heads/master/assets/img/app-screenshots/favorites.jpg)
 
 ---
 
