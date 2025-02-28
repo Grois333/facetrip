@@ -44,3 +44,6 @@ app.*.map.json
 
 #Firebase config file
 /android/app/google-services.json
+
+/android/app/key.jks
+/android/key.properties
