@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:facetrip/User/repository/cloud_firestore_api.dart';
 import 'package:facetrip/face_trips_cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:facetrip/widgets/gradient_back.dart';
@@ -17,6 +19,9 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreen extends State<SignInScreen> {
   late UserBloc userBloc;
   late double screenWidth;
+
+  // At the top of your widget
+  bool _isSigningIn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,56 +68,90 @@ class _SignInScreen extends State<SignInScreen> {
                 ),
               ),
               
+
               ButtonGreen(
                 text: "Login with Gmail",
-
                 onPressed: () async {
+                  // Don't await signOut if it doesn't return a Future
                   userBloc.signOut(); // Clear existing session
+
+                  if (_isSigningIn) return; // Prevent multiple sign-in attempts
+
+                  setState(() {
+                    _isSigningIn = true;
+                  });
+                  
                   try {
                     firebase_auth.User? firebaseUser = await userBloc.signIn();
-
+                    
                     if (firebaseUser != null) {
                       print("Signed in as: ${firebaseUser.uid}");
-
-                      // Attempt to fetch the user from Firestore
-                      User? existingUser = await userBloc.getUserData(firebaseUser.uid);
-
-                      if (existingUser == null) {
-                        print("No existing user found in Firestore for UID: ${firebaseUser.uid}. Creating new user.");
-                        
-                        // User doesn't exist, so create a new record
-                        userBloc.updateUserData(
-                          User(
-                            key: Key(firebaseUser.uid),
-                            uid: firebaseUser.uid,
-                            name: firebaseUser.displayName ?? "",
-                            email: firebaseUser.email ?? "",
-                            photoURL: firebaseUser.photoURL ?? "",
-                            myPlaces: [], // Initialize as empty list
-                            myFavoritePlaces: [], // Initialize as empty list
-                          ),
-                        );
-
-                        print("New user registered.");
+                      
+                      // Directly check if user document exists
+                      bool userExists = false;
+                      try {
+                        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                            .collection(CloudFirestoreAPI().USERS)
+                            .doc(firebaseUser.uid)
+                            .get();
+                        userExists = userDoc.exists;
+                        print("User document exists check: $userExists");
+                      } catch (e) {
+                        print("Error checking user existence: $e");
+                      }
+                      
+                      if (userExists) {
+                        // User exists - load their data
+                        try {
+                          User? existingUser = await userBloc.getUserData(firebaseUser.uid);
+                          
+                          if (existingUser != null) {
+                            print("Existing user found: ${existingUser.uid}");
+                            print("User myPlaces: ${existingUser.myPlaces.length}");
+                            print("User myFavoritePlaces: ${existingUser.myFavoritePlaces.length}");
+                            
+                            // Update any necessary session data without overwriting user data
+                            // For example, you might want to update the last login time
+                            // userBloc.updateLastLoginTime(firebaseUser.uid);
+                            
+                            // Additional logic for existing user
+                          } else {
+                            print("User document exists but couldn't be loaded properly.");
+                            // Handle this edge case - maybe update minimal user data
+                          }
+                        } catch (e) {
+                          print("Error loading existing user: $e");
+                        }
                       } else {
-                        print("Existing user found: UID: ${existingUser.uid}, Name: ${existingUser.name}");
-                        print("User myPlaces: ${existingUser.myPlaces}");
-                        print("User myFavoritePlaces: ${existingUser.myFavoritePlaces}");
+                        // User doesn't exist - create new user
+                        print("No existing user found. Creating new user.");
                         
-                        // User exists; no need to update
-                        print("User already exists. No update needed.");
+                        User newUser = User(
+                          key: Key(firebaseUser.uid),
+                          uid: firebaseUser.uid,
+                          name: firebaseUser.displayName ?? "",
+                          email: firebaseUser.email ?? "",
+                          photoURL: firebaseUser.photoURL ?? "",
+                          myPlaces: [], // Initialize as empty list
+                          myFavoritePlaces: [], // Initialize as empty list
+                        );
+                        
+                        userBloc.updateUserData(newUser);
+                        print("New user registered.");
                       }
                     }
                   } catch (e) {
                     print("Sign-in failed: $e");
+                  } finally {
+                    setState(() {
+                      _isSigningIn = false;
+                    });
                   }
                 },
-
-
-
                 width: 300.0,
                 height: 50.0,
               ),
+
 
 
 

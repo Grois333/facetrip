@@ -19,8 +19,8 @@ class User {
     required this.name,
     required this.email,
     required this.photoURL,
-    required this.myPlaces,
-    required this.myFavoritePlaces,
+    this.myPlaces = const [],
+    this.myFavoritePlaces = const [],
     this.description = "There is an amazing place in Sri Lanka", // Default value
   });
 
