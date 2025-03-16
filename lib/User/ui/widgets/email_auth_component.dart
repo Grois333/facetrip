@@ -15,6 +15,11 @@ class _EmailAuthComponentState extends State<EmailAuthComponent> {
   bool _isRegistering = false;
   bool _showSignUp = false;
 
+  bool _isResettingPassword = false;
+  bool _showResetPassword = false;
+  final TextEditingController _resetEmailController = TextEditingController();
+  final _resetFormKey = GlobalKey<FormState>();
+
   // Form controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -28,11 +33,12 @@ class _EmailAuthComponentState extends State<EmailAuthComponent> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _nameController.dispose();
+    _resetEmailController.dispose();
     super.dispose();
   }
 
   // Show a snackbar with error message
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isError = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -40,6 +46,53 @@ class _EmailAuthComponentState extends State<EmailAuthComponent> {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  // Reset password method
+  Future<void> _resetPassword() async {
+    if (!_resetFormKey.currentState!.validate()) return;
+
+    setState(() {
+      _isResettingPassword = true;
+    });
+
+    try {
+      await firebase_auth.FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _resetEmailController.text.trim(),
+      );
+      
+      setState(() {
+        _isResettingPassword = false;
+        _showResetPassword = false;
+      });
+      
+      // Clear the reset email field
+      _resetEmailController.clear();
+      
+      // Show success message
+      _showSnackBar(
+        'Password reset email sent. Please check your inbox.', 
+        isError: false
+      );
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      setState(() {
+        _isResettingPassword = false;
+      });
+      
+      if (e.code == 'user-not-found') {
+        _showSnackBar('No user found with this email.');
+      } else if (e.code == 'invalid-email') {
+        _showSnackBar('The email address is not valid.');
+      } else {
+        _showSnackBar('Password reset error: ${e.message}');
+      }
+    } catch (e) {
+      setState(() {
+        _isResettingPassword = false;
+      });
+      _showSnackBar('An unexpected error occurred.');
+      print("Password reset error: $e");
+    }
   }
 
   // Create user document in Firestore
@@ -204,6 +257,79 @@ class _EmailAuthComponentState extends State<EmailAuthComponent> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+
+    // Reset password UI
+    if (_showResetPassword) {
+      return Container(
+        width: screenWidth * 0.85,
+        margin: EdgeInsets.only(bottom: 20),
+        child: Form(
+          key: _resetFormKey,
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.only(bottom: 15),
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: TextFormField(
+                  controller: _resetEmailController,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Enter your email',
+                    prefixIcon: Icon(Icons.email, color: Colors.blue),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              
+              ButtonGreen(
+                text: 'Send Reset Email',
+                onPressed: _isResettingPassword ? () {} : () => _resetPassword(),
+                width: 300.0,
+                height: 50.0,
+              ),
+              
+              if (_isResettingPassword)
+                Container(
+                  margin: EdgeInsets.only(top: 15),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              
+              SizedBox(height: 15),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showResetPassword = false;
+                    _resetEmailController.clear();
+                  });
+                },
+                child: Text(
+                  "Back to Login",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     
     return Container(
       width: screenWidth * 0.85,
@@ -358,6 +484,24 @@ class _EmailAuthComponentState extends State<EmailAuthComponent> {
                 ),
               ),
             ),
+
+            SizedBox(height: 15),
+            if (!_showSignUp) // Only show on login screen
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showResetPassword = true;
+                  });
+                },
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
           ],
         ),
       ),
