@@ -22,7 +22,7 @@ class ProfilePlacesList extends StatelessWidget {
       uid: "1",  // Example user ID
       name: "John Doe",
       email: "john.doe@example.com",
-      photoURL: "https://example.com/photo.jpg",
+      photoURL: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
       myPlaces: [],
       myFavoritePlaces: [],
     ),

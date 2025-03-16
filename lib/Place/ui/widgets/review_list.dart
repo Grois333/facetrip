@@ -33,6 +33,8 @@ class ReviewList extends StatelessWidget {
             future: Future.wait([
               _getUserPlacesCount(userId),
               _getUserDescription(userId),
+              _getUserName(userId),
+              _getUserImage(userId),
             ]),
             builder: (context, AsyncSnapshot<List<dynamic>> combinedSnapshot) {
               if (combinedSnapshot.connectionState == ConnectionState.waiting) {
@@ -40,6 +42,8 @@ class ReviewList extends StatelessWidget {
               } else if (combinedSnapshot.hasData) {
                 final numberOfPlaces = combinedSnapshot.data![0] as int;
                 final userDescription = combinedSnapshot.data![1] as String?;
+                final nameUser = combinedSnapshot.data![2] as String?;
+                final imageUser = combinedSnapshot.data![3] as String?;
 
                 return Row(
                   children: [
@@ -51,7 +55,7 @@ class ReviewList extends StatelessWidget {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: NetworkImage(userPhotoUrl.isNotEmpty ? userPhotoUrl : 'https://www.example.com/default_image.png'),
+                          image: NetworkImage(imageUser!.isNotEmpty ? imageUser : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
                         ),
                       ),
                     ),
@@ -62,7 +66,7 @@ class ReviewList extends StatelessWidget {
                           Container(
                             margin: EdgeInsets.only(left: 20.0),
                             child: Text(
-                              userName,
+                              nameUser!,
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 fontFamily: "Lato",
@@ -146,4 +150,31 @@ class ReviewList extends StatelessWidget {
       return null;
     }
   }
+
+  Future<String?> _getUserName(String? userId) async {
+    if (userId == null) return null;
+
+    try {
+      final userSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      return userSnapshot.data()?['name'] as String?;
+    } catch (e) {
+      print("Error fetching user name: $e");
+      return null;
+    }
+  }
+
+  Future<String?> _getUserImage(String? userId) async {
+    if (userId == null) return null;
+
+    try {
+      final userSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      return userSnapshot.data()?['photoURL'] as String?;
+    } catch (e) {
+      print("Error fetching user image: $e");
+      return null;
+    }
+  }
+
 }

@@ -32,24 +32,29 @@ class HeaderAppBar extends StatelessWidget {
     if (!snapshot.hasData || snapshot.hasError) {
       return Stack(
         children: [
-          GradientBack("Bienvenido", 250.0),
-          Center(child: Text("Usuario no logeado. Haz Login")),
+          GradientBack("Welcome", 250.0),
+          Center(child: Text("User not logged in. Make Login")),
         ],
       );
     } else {
+
+      // Get the firebase_auth.User from snapshot
+      final firebaseUser = snapshot.data;
+      
+      // Create a User object with proper null safety
       User user = User(
         key: UniqueKey(),
-        uid: snapshot.data.uid,
-        name: snapshot.data.displayName,
-        email: snapshot.data.email,
-        photoURL: snapshot.data.photoURL,
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName ?? "", // Use empty string as fallback
+        email: firebaseUser.email ?? "",      // Use empty string as fallback
+        photoURL: firebaseUser.photoURL ?? "", // Use empty string as fallback
         myPlaces: [],
         myFavoritePlaces: [],
       );
 
       return Stack(
         children: [
-          GradientBack("Bienvenido", 250.0),
+          GradientBack("Welcome", 250.0),
           // Pass the User object to CardImageList
           CardImageList(user), // Pass the User object here directly
         ],

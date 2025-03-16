@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:facetrip/User/repository/cloud_firestore_api.dart';
+import 'package:facetrip/User/ui/widgets/email_auth_component.dart';
 import 'package:facetrip/face_trips_cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:facetrip/widgets/gradient_back.dart';
@@ -67,6 +68,25 @@ class _SignInScreen extends State<SignInScreen> {
                   ),
                 ),
               ),
+
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                ),
+
+              // Add our new email authentication component here
+              EmailAuthComponent(),
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Text(
+                    "OR",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               
 
               ButtonGreen(
