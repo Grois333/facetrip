@@ -1,0 +1,2 @@
+C:/Users/isaac/OneDrive/Escritorio/Flutter Apps/facetrip/facetrip/android/app/.cxx/RelWithDebInfo/1m5m5u4s/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/isaac/OneDrive/Escritorio/Flutter Apps/facetrip/facetrip/android/app/.cxx/RelWithDebInfo/1m5m5u4s/arm64-v8a/CMakeFiles/rebuild_cache.dir

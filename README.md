@@ -5,7 +5,7 @@
 FaceTrip is a Flutter-based travel journal app that allows users to log in with their Google account, add and share their travel experiences, and save favorite trips. The app uses Firebase Firestore for data storage and Firebase Storage for image uploads.
 
 ## 📲 Download the App
-![Download FaceTrip]()
+![Download FaceTrip](https://play.google.com/store/apps/details?id=com.groisman.facetrip)
 
 ---
 
